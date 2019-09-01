@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,7 @@ import static com.auth0.jwt.JWT.require;
 @Service
 public class JwtService {
 
-    private static final Log log = LogFactory.getLog(JwtService.class);
+    private static final Log LOG = LogFactory.getLog(JwtService.class);
 
     @Value("${JWT.ISSUER}")
     private String ISSUER;
@@ -31,7 +32,7 @@ public class JwtService {
     @Value("${JWT.SECRET}")
     private String SECRET;
 
-    public TokenRes create(final int userIdx) {
+    public String create(final int userIdx) {
         final TokenRes tokenRes = new TokenRes();
         try {
             //토큰 생성 빌더 객체 생성
@@ -39,15 +40,15 @@ public class JwtService {
             //토큰 생성자 명시
             b.withIssuer(ISSUER);
             //토큰 payload 작성, key - value 형식, 객체도 가능
-            b.withClaim("userIdx", userIdx);
+            b.withClaim("user_Idx", userIdx);
             //만료 날자 지정, 1달
-            b.withExpiresAt(expiresAt());
+            //b.withExpiresAt(expiresAt());
             //토큰 해싱해서 반환
-            tokenRes.setToken(b.sign(Algorithm.HMAC256(SECRET)));
+            return b.sign(Algorithm.HMAC256(SECRET));
         } catch (JWTCreationException JwtCreationException) {
-            log.info(JwtCreationException.getMessage());
+            LOG.info(JwtCreationException.getMessage());
         }
-        return tokenRes;
+        return "";
     }
 
     private Date expiresAt() {
@@ -65,11 +66,11 @@ public class JwtService {
             //토큰 검증
             DecodedJWT decodedJWT = jwtVerifier.verify(token);
             //토큰 payload 반환, 정상적인 토큰이라면 토큰 주인(사용자) 고유 ID, 아니라면 -1
-            return new Token(decodedJWT.getClaim("user_idx").asLong().intValue());
+            return new Token(decodedJWT.getClaim("user_Idx").asLong().intValue());
         } catch (Exception jve) {
-            log.error(jve.getMessage());
+            LOG.error(jve.getMessage());
         }
-        return null;
+        return new Token();
     }
 
     public boolean checkAuth(final String header, final int userIdx) {

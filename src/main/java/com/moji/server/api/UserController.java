@@ -42,7 +42,7 @@ public class UserController {
         try {
             return new ResponseEntity<>(userService.saveUser(user), HttpStatus.OK);
         } catch (Exception e) {
-            log.error("{}", e);
+            log.error(e.getMessage());
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

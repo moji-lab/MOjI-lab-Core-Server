@@ -27,9 +27,19 @@ public class AuthService {
     public DefaultRes login(final LoginReq loginReq) {
         Optional<User> user = userRepository.findByEmailAndPassword(loginReq.getEmail(), loginReq.getPassword());
         if(user.isPresent()) {
-            final JwtService.TokenRes tokenRes = jwtService.create(user.get().getUserIdx());
-            return DefaultRes.res(StatusCode.CREATED, "로그인 성공", tokenRes);
+            final String token = jwtService.create(user.get().getUserIdx());
+            return DefaultRes.res(StatusCode.CREATED, "로그인 성공", token);
         }
         return DefaultRes.res(StatusCode.UNAUTHORIZED, "로그인 실패");
+    }
+
+    public int authorization(final String jwt) {
+        final int userIdx = jwtService.decode(jwt).getUser_idx();
+        if(userIdx == -1) return -1;
+
+        final Optional<User> user = userRepository.findById(userIdx);
+        if(!user.isPresent()) return -1;
+
+        return userIdx;
     }
 }

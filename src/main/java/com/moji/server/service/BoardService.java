@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,8 +33,7 @@ public class BoardService {
                         final CourseController courseController,
                         final CourseService courseService,
                         final LikeService likeService,
-                        final UserRepository userRepository)
-    {
+                        final UserRepository userRepository) {
         this.boardRepository = boardRepository;
         this.courseController = courseController;
         this.courseService = courseService;
@@ -43,17 +43,15 @@ public class BoardService {
 
     //게시물 작성
     @Transactional
-    public DefaultRes saveBoard(final BoardReq board)
-    {
-        try{
+    public DefaultRes saveBoard(final BoardReq board) {
+        try {
 
             board.getInfo().setWriteTime(new Date());
             boardRepository.save(board.getInfo());
             courseController.saveCourse(board);
 
             //공유
-            for(int i = 0; i < board.getInfo().getShare().size(); i++)
-            {
+            for (int i = 0; i < board.getInfo().getShare().size(); i++) {
                 Board info = board.getInfo();
 
                 board.getInfo().setUserIdx(info.getShare().get(i));
@@ -64,8 +62,7 @@ public class BoardService {
             }
 
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
-        }catch (Exception e)
-        {
+        } catch (Exception e) {
             log.info(e.getMessage());
             return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
         }
@@ -93,20 +90,15 @@ public class BoardService {
     }
 
     //게시물 공유
-    public DefaultRes shareBoard(final String person)
-    {
-        try{
-
-            List<User> email = userRepository.findByEmail(person);
-            List<User> nickname = userRepository.findByNickname(person);
-
-
-            if(email.size() == 0 && nickname.size() == 0) return DefaultRes.res(StatusCode.NOT_FOUND, "해당 사용자 없음");
-            else if(email.size() > 0) return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", email);
+    public DefaultRes shareBoard(final String person) {
+        try {
+            Optional<User> email = userRepository.findByEmail(person);
+            Optional<User> nickname = userRepository.findByNickname(person);
+            if (!email.isPresent() && !nickname.isPresent()) return DefaultRes.res(StatusCode.NOT_FOUND, "해당 사용자 없음");
+            else if (email.isPresent()) return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", email);
             else return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", nickname);
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             log.info(e.getMessage());
             return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
         }
