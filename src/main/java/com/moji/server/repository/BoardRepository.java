@@ -8,5 +8,5 @@ import java.util.List;
 public interface BoardRepository extends MongoRepository<Board, String> {
     Board findBy_id(String boardIdx);
 
-    List<Board> findByOpen(boolean open);
+    List<Board> findByOpenOrderByWriteTimeDesc(boolean open);
 }
