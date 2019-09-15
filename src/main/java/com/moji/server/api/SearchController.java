@@ -21,7 +21,13 @@ public class SearchController {
     @GetMapping("/searches")
     public ResponseEntity<DefaultRes> search(@RequestParam final String keyword) {
         try{
-            return new ResponseEntity<>(searchService.getSearchResultByHashtag(keyword), HttpStatus.OK);
+            if(keyword.charAt(0) == '#') {
+                String keywordExceptHash = keyword.substring(1);
+                return new ResponseEntity<>(searchService.getSearchResultByHashtag(keywordExceptHash), HttpStatus.OK);
+            }
+            else
+                return new ResponseEntity<>(searchService.getSearchResultByPlace(keyword), HttpStatus.OK);
+
         } catch (Exception e){
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.NOT_FOUND);

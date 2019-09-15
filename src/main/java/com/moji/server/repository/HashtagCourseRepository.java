@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface HashtagCourseRepository extends MongoRepository<HashtagCourse, String> {
-    Optional<HashtagCourse> findBytagIdx(final String tagIdx);
+    Optional<List<HashtagCourse>> findAllBytagIdx(final String tagIdx);
 }
