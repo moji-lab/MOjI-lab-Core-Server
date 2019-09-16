@@ -9,10 +9,10 @@ import com.moji.server.domain.SearchResult.CourseSearchResult;
 import com.moji.server.repository.*;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,6 +68,7 @@ public class SearchService {
             }
             if(courses.size() == 0) return DefaultRes.res(StatusCode.NOT_FOUND, "검색된 데이터가 없습니다.");
             else {
+                Collections.sort(courses);
                 SearchCourseRes searchCourseRes = new SearchCourseRes(courses);
                 return DefaultRes.res(StatusCode.OK, "검색 성공",searchCourseRes);
             }
@@ -94,6 +95,7 @@ public class SearchService {
             }
             if(boards.size() == 0) return DefaultRes.res(StatusCode.NOT_FOUND, "검색된 데이터가 없습니다.");
             else {
+                Collections.sort(boards);
                 SearchBoardRes searchBoardRes = new SearchBoardRes(boards);
                 return DefaultRes.res(StatusCode.OK, "검색 성공", searchBoardRes);
             }
