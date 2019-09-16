@@ -27,6 +27,7 @@ public class HashtagService {
         this.hashtagCourseRepository = hashtagCourseRepository;
     }
 
+    // 해시태그 저장
     public DefaultRes saveHashtags(final HashtagReq hashtagReq){
         try{
             List<HashtagCourse> hashtagCourses = new ArrayList<>();
@@ -57,6 +58,7 @@ public class HashtagService {
         }
     }
 
+    // 해시태그 조회
     public DefaultRes getHashtags(final String tag){
         Optional<List<Hashtag>> hashtag = hashtagRepository.findAllByTagInfoContaining(tag);
         return hashtag.map(value -> DefaultRes.res(StatusCode.OK, "사용자 정보 조회 완료", value)).orElseGet(() -> DefaultRes.res(StatusCode.NOT_FOUND, "사용자를 찾을 수 없습니다."));

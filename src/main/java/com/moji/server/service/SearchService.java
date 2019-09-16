@@ -2,6 +2,7 @@ package com.moji.server.service;
 
 import com.moji.server.domain.*;
 import com.moji.server.model.DefaultRes;
+import com.moji.server.model.SearchReq;
 import com.moji.server.model.SearchRes.SearchCourseRes;
 import com.moji.server.model.SearchRes.SearchBoardRes;
 import com.moji.server.domain.SearchResult.BoardSearchResult;
@@ -21,7 +22,7 @@ import java.util.Optional;
 public class SearchService {
     private final HashtagRepository hashtagRepository;
     private final HashtagCourseRepository hashtagCourseRepository;
-    private final SearchCourseRepository searchCourseRepository;
+    private final CourseRepository courseRepository;
     private final AddressRepository addressRepository;
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
@@ -31,7 +32,7 @@ public class SearchService {
     // 생성자 의존성 주입
     public SearchService(final HashtagRepository hashtagRepository,
                          final HashtagCourseRepository hashtagCourseRepository,
-                         final SearchCourseRepository searchCourseRepository,
+                         final CourseRepository courseRepository,
                          final AddressRepository addressRepository,
                          final BoardRepository boardRepository,
                          final UserRepository userRepository,
@@ -39,7 +40,7 @@ public class SearchService {
                          final LikeCourseRepository likeCourseRepository) {
         this.hashtagRepository = hashtagRepository;
         this.hashtagCourseRepository = hashtagCourseRepository;
-        this.searchCourseRepository = searchCourseRepository;
+        this.courseRepository = courseRepository;
         this.addressRepository = addressRepository;
         this.boardRepository = boardRepository;
         this.userRepository = userRepository;
@@ -49,8 +50,8 @@ public class SearchService {
 
     // 해시태그 키워드로 검색 결과 조회
     // 가 데이터 쌓이면 조회 총 개수 5개 이상일 경우만 검색 결과 노출하기 구현
-    public DefaultRes getSearchResultByHashtag(final String keyword){
-        Optional<List<Hashtag>> hashtags = hashtagRepository.findAllByTagInfoContaining(keyword);
+    public DefaultRes getSearchResultByHashtag(final SearchReq searchReq){
+        Optional<List<Hashtag>> hashtags = hashtagRepository.findAllByTagInfoContaining(searchReq.getKeyword());
         if(hashtags.isPresent()){
             List<CourseSearchResult> courses = new ArrayList<>();
             for(int i = 0; i<hashtags.get().size(); i++){
@@ -58,7 +59,15 @@ public class SearchService {
                         hashtagCourseRepository.findAllBytagIdx(hashtags.get().get(i).get_id()).get();
                 for(int j = 0; j<hashtagCourses.size(); j++){
                     String courseIdx = hashtagCourses.get(j).getCourseIdx();
-                    Course course = searchCourseRepository.findBy_id(courseIdx).get();
+                    Course course;
+                    if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
+                        course = courseRepository.findBy_idAndVisitTimeBetween(courseIdx,
+                                searchReq.getStartDate().atStartOfDay(),
+                                searchReq.getEndDate().plusDays(1).atStartOfDay());
+                    }
+                    else{
+                        course = courseRepository.findBy_id(courseIdx);
+                    }
                     CourseSearchResult courseSearchResult = new CourseSearchResult();
                     courseSearchResult.setCourse(course);
                     courseSearchResult.setWriter(userRepository.findByUserIdx(course.getUserIdx()));
@@ -80,14 +89,22 @@ public class SearchService {
 
     // 장소 or 주소 키워드로 검색 결과 조회
     // 가 데이터 쌓이면 조회 총 개수 5개 이상일 경우만 검색 결과 노출하기 구현
-    public DefaultRes getSearchResultByPlace(final String keyword){
-        Optional<List<Address>> addresses = addressRepository.findAllByPlaceContaining(keyword);
+    public DefaultRes getSearchResultByPlace(final SearchReq searchReq){
+        Optional<List<Address>> addresses = addressRepository.findAllByPlaceContaining(searchReq.getKeyword());
         if(addresses.isPresent()){
             List<BoardSearchResult> boards = new ArrayList<>();
             for(int i = 0; i<addresses.get().size(); i++){
                 BoardSearchResult boardSearchResult = new BoardSearchResult();
                 String boardIdx = addresses.get().get(i).getBoardIdx();
-                Board board =  boardRepository.findBy_id(boardIdx);
+                Board board;
+                if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
+                    board = boardRepository.findBy_idAndWriteTimeBetween(boardIdx,
+                            searchReq.getStartDate().atStartOfDay(),
+                            searchReq.getEndDate().plusDays(1).atStartOfDay());
+                }
+                else{
+                    board = boardRepository.findBy_id(boardIdx);
+                }
                 boardSearchResult.setBoard(board);
                 boardSearchResult.setWriter(userRepository.findByUserIdx(board.getUserIdx()));
                 boardSearchResult.setLikeCount(likeBoardRepository.countByBoardIdx(board.get_id()));

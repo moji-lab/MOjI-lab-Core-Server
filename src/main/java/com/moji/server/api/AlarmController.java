@@ -28,7 +28,7 @@ public class AlarmController {
     }
     @Auth
     @GetMapping("/alarms")
-    public ResponseEntity<DefaultRes> getRandomBoards(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<DefaultRes> getUserAlarms(HttpServletRequest httpServletRequest) {
         try {
             int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(alarmService.getAlarms(userIdx), HttpStatus.OK);
