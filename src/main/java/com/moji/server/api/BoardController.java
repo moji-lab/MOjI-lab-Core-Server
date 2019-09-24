@@ -66,11 +66,11 @@ public class BoardController {
         }
     }
 
-    //게시물 공유 사람 조
-    @GetMapping("shares/{personIdx}")
-    public ResponseEntity<DefaultRes> getSharePerson(@PathVariable(value = "personIdx") final String personIdx) {
+    //게시물 공유 사람 조회
+    @GetMapping("shares/{person}")
+    public ResponseEntity<DefaultRes> getSharePerson(@PathVariable(value = "person") final String person) {
         try {
-            return new ResponseEntity<>(boardService.getSharePerson(personIdx), HttpStatus.OK);
+            return new ResponseEntity<>(boardService.getSharePerson(person), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.NOT_FOUND);

@@ -2,10 +2,7 @@ package com.moji.server.service;
 
 import com.moji.server.api.CourseController;
 import com.moji.server.domain.*;
-import com.moji.server.model.BoardReq;
-import com.moji.server.model.BoardRes;
-import com.moji.server.model.DefaultRes;
-import com.moji.server.model.FeedRes;
+import com.moji.server.model.*;
 import com.moji.server.repository.BoardRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
@@ -97,9 +94,23 @@ public class BoardService {
         try {
             Optional<User> email = userRepository.findByEmail(person);
             Optional<User> nickname = userRepository.findByNickname(person);
+            Optional<PersonRes> personRes = Optional.of(new PersonRes());
+
+
             if (!email.isPresent() && !nickname.isPresent()) return DefaultRes.res(StatusCode.NOT_FOUND, "해당 사용자 없음");
-            else if (email.isPresent()) return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", email);
-            else return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", nickname);
+            else if (email.isPresent()) {
+                personRes.get().setEmail(email.get().getEmail());
+                personRes.get().setNickname(email.get().getNickname());
+                personRes.get().setUserIdx(email.get().getUserIdx());
+            }
+            else
+            {
+                personRes.get().setEmail(nickname.get().getEmail());
+                personRes.get().setNickname(nickname.get().getNickname());
+                personRes.get().setUserIdx(nickname.get().getUserIdx());
+            }
+
+            return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", personRes);
 
         } catch (Exception e) {
             log.info(e.getMessage());
