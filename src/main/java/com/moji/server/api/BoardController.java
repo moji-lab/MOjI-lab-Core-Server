@@ -29,10 +29,12 @@ public class BoardController {
     }
 
     //게시물 등록
+    @Auth
     @PostMapping("boards")
-    public ResponseEntity<DefaultRes> saveBoard(final BoardReq board) {
+    public ResponseEntity<DefaultRes> saveBoard(final BoardReq board, HttpServletRequest httpServletRequest) {
         try {
-            return new ResponseEntity<>(boardService.saveBoard(board), HttpStatus.OK);
+            int userIdx = (int)httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(boardService.saveBoard(board, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.NOT_FOUND);
@@ -64,14 +66,15 @@ public class BoardController {
         }
     }
 
-    //게시물 공유
-    @GetMapping("shares/{person}")
-    public ResponseEntity<DefaultRes> shareBoard(@PathVariable(value = "person") final String person) {
+    //게시물 공유 사람 조
+    @GetMapping("shares/{personIdx}")
+    public ResponseEntity<DefaultRes> getSharePerson(@PathVariable(value = "personIdx") final String personIdx) {
         try {
-            return new ResponseEntity<>(boardService.shareBoard(person), HttpStatus.OK);
+            return new ResponseEntity<>(boardService.getSharePerson(personIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.NOT_FOUND);
         }
     }
+
 }

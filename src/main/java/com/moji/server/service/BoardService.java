@@ -45,10 +45,11 @@ public class BoardService {
 
     //게시물 작성
     @Transactional
-    public DefaultRes saveBoard(final BoardReq board) {
+    public DefaultRes saveBoard(final BoardReq board, int userIdx) {
         try {
 
             board.getInfo().setWriteTime(new Date());
+            board.getInfo().setUserIdx(userIdx);
             boardRepository.save(board.getInfo());
             courseController.saveCourse(board);
 
@@ -91,8 +92,8 @@ public class BoardService {
         return boardRepository.findBy_id(postIdx) != null;
     }
 
-    //게시물 공유
-    public DefaultRes shareBoard(final String person) {
+    //게시물 공유 사람 조회
+    public DefaultRes getSharePerson(final String person) {
         try {
             Optional<User> email = userRepository.findByEmail(person);
             Optional<User> nickname = userRepository.findByNickname(person);
