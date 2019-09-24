@@ -27,7 +27,7 @@ public class CourseService {
     // 생성자 의존성 주입
     public CourseService(final CourseRepository courseRepository,
                          final LikeService likeService,
-                         final S3FileUploadService s3FileUploadService)
+                         final S3FileUploadService s3FileUploadService) 
     {
         this.courseRepository = courseRepository;
         this.likeService = likeService;
@@ -36,14 +36,12 @@ public class CourseService {
 
     //코스 저장
     @Transactional
-    public DefaultRes saveCourse(final BoardReq board)
-    {
-        try{
+    public DefaultRes saveCourse(final BoardReq board) {
+        try {
             int size = board.getCourses().size();
 
 
-            for(int i = 0; i < size; i++)
-            {
+            for (int i = 0; i < size; i++) {
                 Course course = board.getCourses().get(i);
                 course.setBoardIdx(board.getInfo().get_id());
 
@@ -51,8 +49,7 @@ public class CourseService {
 
                 //사진
                 List<Photo> photos = new ArrayList<Photo>();
-                for(int j = 0; j < course.getPhotos().size(); j++)
-                {
+                for (int j = 0; j < course.getPhotos().size(); j++) {
                     Photo photo = course.getPhotos().get(j);
                     String url = s3MultipartService.upload(photo.getPhoto());
 
@@ -68,7 +65,7 @@ public class CourseService {
             }
 
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.info(e.getMessage());
             return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
         }
@@ -76,6 +73,7 @@ public class CourseService {
 
     /**
      * course 조회
+     *
      * @param courseIdx
      * @return
      */
@@ -85,6 +83,7 @@ public class CourseService {
 
     /**
      * CommentService에서 받아온 comment 추가
+     *
      * @param courseIdx
      * @param comment
      */
