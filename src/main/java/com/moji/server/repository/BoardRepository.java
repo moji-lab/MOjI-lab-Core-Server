@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface BoardRepository extends MongoRepository<Board, String> {
     Board findBy_id(String boardIdx);
-    Board findBy_idAndWriteTimeBetween(String boardIdx, LocalDateTime startDate, LocalDateTime endDate);
+    Board findBy_idAndWriteTimeBetween(String boardIdx, Date startDate, Date endDate);
 
     List<Board> findByOpenOrderByWriteTimeDesc(boolean open);
 }

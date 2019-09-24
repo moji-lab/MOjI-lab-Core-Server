@@ -4,6 +4,7 @@ import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.LoginReq;
 import com.moji.server.repository.UserRepository;
+import com.moji.server.util.AES256Util;
 import com.moji.server.util.StatusCode;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +26,19 @@ public class AuthService {
     }
 
     public DefaultRes login(final LoginReq loginReq) {
-        Optional<User> user = userRepository.findByEmailAndPassword(loginReq.getEmail(), loginReq.getPassword());
-        if(user.isPresent()) {
-            final String token = jwtService.create(user.get().getUserIdx());
-            return DefaultRes.res(StatusCode.CREATED, "로그인 성공", token);
+        try{
+            AES256Util aes256Util = new AES256Util("MOJI-SERVER-ENCRYPT-TEST");
+            Optional<User> user = userRepository.findByEmailAndPassword(loginReq.getEmail(),
+                    aes256Util.encrypt(loginReq.getPassword()));
+            if(user.isPresent()) {
+                final String token = jwtService.create(user.get().getUserIdx());
+                return DefaultRes.res(StatusCode.CREATED, "로그인 성공", token);
+            }
+            return DefaultRes.res(StatusCode.UNAUTHORIZED, "로그인 실패");
         }
-        return DefaultRes.res(StatusCode.UNAUTHORIZED, "로그인 실패");
+        catch(Exception e){
+            return DefaultRes.res(StatusCode.UNAUTHORIZED, "로그인 실패");
+        }
     }
 
     public int authorization(final String jwt) {

@@ -52,7 +52,7 @@ public class UserService {
             return DefaultRes.res(StatusCode.CREATED, "회원 가입 완료");
         } catch (Exception e) {
             System.out.println(e);
-            return DefaultRes.res(StatusCode.DB_ERROR, "회원 가입 실패");
+            return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
         }
     }
 

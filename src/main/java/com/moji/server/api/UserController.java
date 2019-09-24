@@ -27,16 +27,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/mypage")
-    public ResponseEntity<DefaultRes> getUser(final int userIdx) {
-        try {
-            return new ResponseEntity<>(userService.findByUserIdx(userIdx), HttpStatus.OK);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @PostMapping("/users")
     public ResponseEntity<DefaultRes> signUp(@RequestBody final User user) {
         try {
@@ -61,6 +51,16 @@ public class UserController {
     public ResponseEntity<DefaultRes> checkNickname(@RequestParam("nickName") final String nickName) {
         try {
             return new ResponseEntity<>(userService.validateNickName(nickName), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/users/mypage")
+    public ResponseEntity<DefaultRes> getUser(final int userIdx) {
+        try {
+            return new ResponseEntity<>(userService.findByUserIdx(userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
