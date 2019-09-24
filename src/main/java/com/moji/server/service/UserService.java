@@ -63,7 +63,7 @@ public class UserService {
      */
     public DefaultRes validateEmail(final String email) {
         Optional<User> user = userRepository.findByEmail(email);
-        return user.map(value -> DefaultRes.res(StatusCode.BAD_REQUEST, "중복된 이메일입니다.", value)).orElseGet(() -> DefaultRes.res(StatusCode.OK, "사용 가능 합니다."));
+        return user.map(value -> DefaultRes.res(StatusCode.BAD_REQUEST, "중복된 이메일입니다.")).orElseGet(() -> DefaultRes.res(StatusCode.OK, "사용 가능 합니다."));
     }
 
     /**
@@ -73,6 +73,6 @@ public class UserService {
      */
     public DefaultRes validateNickName(final String nickName) {
         Optional<User> user = userRepository.findByNickname(nickName);
-        return user.map(value -> DefaultRes.res(StatusCode.BAD_REQUEST, "중복된 닉네임입니다.(", value)).orElseGet(() -> DefaultRes.res(StatusCode.OK, "사용 가능 합니다."));
+        return user.map(value -> DefaultRes.res(StatusCode.BAD_REQUEST, "중복된 닉네임입니다.")).orElseGet(() -> DefaultRes.res(StatusCode.OK, "사용 가능 합니다."));
     }
 }

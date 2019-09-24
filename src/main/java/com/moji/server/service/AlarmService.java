@@ -22,6 +22,9 @@ public class AlarmService {
 
     public DefaultRes getAlarms(final int userIdx){
         Optional<List<Alarm>> alarms = alarmRepository.findByUserIdx(userIdx);
-        return alarms.map(value -> DefaultRes.res(StatusCode.OK, "알람 조회 ", value)).orElseGet(() -> DefaultRes.res(StatusCode.NOT_FOUND, "알람을 찾을 수 없습니다."));
+        if(alarms.isPresent()){
+            if(alarms.get().size() == 0){ return DefaultRes.res(StatusCode.NOT_FOUND, "알람이 없습니다."); }
+        }
+        return alarms.map(value -> DefaultRes.res(StatusCode.OK, "알람 조회 성공", value)).orElseGet(() -> DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러"));
     }
 }
