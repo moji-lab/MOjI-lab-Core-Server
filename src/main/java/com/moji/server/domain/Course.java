@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,8 @@ public class Course {
     private String mainAddress;
     private String subAddress;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime visitTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate visitTime;
   
     private String content;
     private int order;
@@ -37,13 +38,11 @@ public class Course {
     private String boardIdx;
 
     @Field
-    private int userIdx=1;
+    private int userIdx;
 
     //사진
     private List<Photo> photos = new ArrayList<Photo>();
 
     //댓글
     private List<Comment> comments = new ArrayList<Comment>();
-
-    //해시태그
 }

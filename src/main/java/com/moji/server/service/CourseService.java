@@ -44,6 +44,7 @@ public class CourseService {
             for (int i = 0; i < size; i++) {
                 Course course = board.getCourses().get(i);
                 course.setBoardIdx(board.getInfo().get_id());
+                course.setUserIdx(board.getInfo().getUserIdx());
 
                 log.info(course.toString());
 
