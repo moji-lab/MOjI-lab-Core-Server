@@ -24,11 +24,9 @@ public class Course {
     private String mainAddress;
     private String subAddress;
 
-//    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
-//    private LocalDateTime visitTime;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime visitTime;
+  
     private String content;
     private int order;
     private List<String> tagInfo = new ArrayList<String>();

@@ -5,6 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface LikeCourseRepository extends MongoRepository<LikeCourse, String> {
     LikeCourse findByCourseIdxAndUserIdx(String postIdx, int userIdx);
-
-    int countByCourseIdx(String courseIdx);
+    int countByCourseIdx(String boardIdx);
 }
