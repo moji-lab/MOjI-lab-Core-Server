@@ -12,5 +12,5 @@ public interface BoardRepository extends MongoRepository<Board, String> {
     Board findBy_id(String boardIdx);
     Board findBy_idAndWriteTimeBetween(String boardIdx, LocalDateTime startDate, LocalDateTime endDate);
 
-    List<Board> findByOpen(boolean open);
+    List<Board> findByOpenOrderByWriteTimeDesc(boolean open);
 }

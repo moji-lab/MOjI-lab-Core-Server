@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Data
 public class Comment {
-    private int userIdx = 1;
+    private int userIdx;
     private String content;
     private Date writeTime;
 }
