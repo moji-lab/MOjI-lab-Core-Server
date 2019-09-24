@@ -61,6 +61,9 @@ public class HashtagService {
     // 해시태그 조회
     public DefaultRes getHashtags(final String tag){
         Optional<List<Hashtag>> hashtag = hashtagRepository.findAllByTagInfoContaining(tag);
-        return hashtag.map(value -> DefaultRes.res(StatusCode.OK, "사용자 정보 조회 완료", value)).orElseGet(() -> DefaultRes.res(StatusCode.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+        if(hashtag.isPresent()){
+            if(hashtag.get().size() == 0){ return DefaultRes.res(StatusCode.NOT_FOUND, "해시태그를 찾을 수 없습니다."); }
+        }
+        return hashtag.map(value -> DefaultRes.res(StatusCode.OK, "해시태그 조회 성공", value)).orElseGet(() -> DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러"));
     }
 }
