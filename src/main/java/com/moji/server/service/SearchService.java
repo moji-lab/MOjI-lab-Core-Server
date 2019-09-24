@@ -60,11 +60,16 @@ public class SearchService {
                 for(int j = 0; j<hashtagCourses.size(); j++){
                     String courseIdx = hashtagCourses.get(j).getCourseIdx();
                     Course course;
+
+                    // 날짜 필터 적용시
                     if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
+                        System.out.println(searchReq.getStartDate());
+                        System.out.println(searchReq.getEndDate());
                         course = courseRepository.findBy_idAndVisitTimeBetween(courseIdx,
-                                searchReq.getStartDate().atStartOfDay(),
-                                searchReq.getEndDate().plusDays(1).atStartOfDay());
+                                searchReq.getStartDate(),
+                                searchReq.getEndDate());
                     }
+                    // 날짜 필터 미적용시
                     else{
                         course = courseRepository.findBy_id(courseIdx);
                     }
@@ -99,8 +104,8 @@ public class SearchService {
                 Board board;
                 if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
                     board = boardRepository.findBy_idAndWriteTimeBetween(boardIdx,
-                            searchReq.getStartDate().atStartOfDay(),
-                            searchReq.getEndDate().plusDays(1).atStartOfDay());
+                            searchReq.getStartDate(),
+                            searchReq.getEndDate());
                 }
                 else{
                     board = boardRepository.findBy_id(boardIdx);
