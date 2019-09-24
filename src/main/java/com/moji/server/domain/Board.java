@@ -33,6 +33,7 @@ public class Board {
     private int userIdx = 1;
 
     @Field
+
     //공유 친구
     private List<Integer> share = new ArrayList<Integer>();
 
