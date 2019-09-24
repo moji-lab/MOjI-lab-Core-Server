@@ -27,7 +27,7 @@ public class CourseService {
     // 생성자 의존성 주입
     public CourseService(final CourseRepository courseRepository,
                          final LikeService likeService,
-                         final S3FileUploadService s3FileUploadService) 
+                         final S3FileUploadService s3FileUploadService)
     {
         this.courseRepository = courseRepository;
         this.likeService = likeService;
