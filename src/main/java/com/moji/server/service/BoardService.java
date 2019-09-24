@@ -3,6 +3,7 @@ package com.moji.server.service;
 import com.moji.server.api.CourseController;
 import com.moji.server.domain.*;
 import com.moji.server.model.BoardReq;
+import com.moji.server.model.BoardRes;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.FeedRes;
 import com.moji.server.repository.BoardRepository;
@@ -10,6 +11,7 @@ import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -107,24 +109,29 @@ public class BoardService {
     public DefaultRes getRecentFeed(int userIdx) {
         try {
             // TODO: 공개 대상인지 판단하여 공개 설정
-            List<Board> boardList = boardRepository.findByOpen(true); // TODO: 값 조정될 필요성
+            List<Board> boardList = boardRepository.findByOpenOrderByWriteTimeDesc(true); // TODO: 값 조정될 필요성
 
-            log.info(boardList.toString());
             List<FeedRes> feedResList = new ArrayList<>();
             for (int i = 0; i < boardList.size(); i++) {
-                log.info("i " + i);
                 Board board = boardList.get(i);
-                List<Course> courseList = courseService.getAllRepresentPhotosByBoardIdx(board.get_id());
+                User user = userRepository.findByUserIdx(board.getUserIdx());
+                if (user == null) {
+                    continue;
+                }
+
+                List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
+                log.info(courseList.toString());
+                if (courseList.size() == 0) { // 코스 정보가 없을 경우?
+                    continue;
+                }
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
                     photoList.add(courseList.get(j).getPhotos().get(0));
                 }
-                User user = userRepository.findByUserIdx(board.getUserIdx());
 
                 FeedRes feedRes = new FeedRes();
-
-                feedRes.setNickName(user.getNickname());
+                feedRes.setNickName(user.getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
                 feedRes.setProfileUrl(user.getPhotoUrl());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
@@ -132,10 +139,31 @@ public class BoardService {
                 feedRes.setDate(board.getWriteTime());
                 feedRes.setCommentCount(board.getComments().size());
                 feedRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
-
+                feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public DefaultRes<BoardRes> getBoardInfo(String boardIdx, int userIdx) {
+        try {
+            BoardRes boardRes = new BoardRes();
+            User user = userRepository.findByUserIdx(userIdx);
+            Board board = boardRepository.findBy_id(boardIdx);
+
+            if (board == null) {
+                return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
+            }
+
+            boardRes.setUser(user);
+            boardRes.set_id(boardIdx);
+            boardRes.setWriteTime(board.getWriteTime());
+            boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
+            return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
             e.printStackTrace();
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
