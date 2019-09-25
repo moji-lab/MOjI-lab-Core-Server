@@ -44,10 +44,9 @@ public class UserService {
      * @param userIdx
      * @return
      */
-    public DefaultRes<String> findPhotoUrlByUserIdx(final int userIdx) {
+    public Optional<String> findPhotoUrlByUserIdx(final int userIdx) {
         final Optional<User> user = userRepository.findById(userIdx);
-        return user.map(value -> DefaultRes.res(StatusCode.OK, "회원 프로필 사진 조회 성공", value.getPhotoUrl()))
-                .orElseGet(() -> DefaultRes.res(StatusCode.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+        return user.map(value -> value.getPhotoUrl());
     }
 
     /**
