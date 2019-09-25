@@ -81,13 +81,4 @@ public class UserController {
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @GetMapping("/users/photoUrl/{userIdx}")
-    public ResponseEntity<DefaultRes> getUserPhotoUrl(@PathVariable("userIdx") final int userIdx) {
-        try {
-            return new ResponseEntity<>(userService.findPhotoUrlByUserIdx(userIdx), HttpStatus.OK);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 }
