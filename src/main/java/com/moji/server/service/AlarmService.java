@@ -1,7 +1,6 @@
 package com.moji.server.service;
 
 import com.moji.server.domain.Alarm;
-import com.moji.server.domain.Hashtag;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.repository.AlarmRepository;
 import com.moji.server.util.StatusCode;
