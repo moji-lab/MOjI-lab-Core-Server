@@ -2,6 +2,7 @@ package com.moji.server.service;
 
 import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
+import com.moji.server.model.SignUpReq;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.AES256Util;
 import com.moji.server.util.StatusCode;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
 /**
  * Created By ds on 2019-08-20.
  */
@@ -30,6 +32,8 @@ public class UserService {
      * 마이 페이지 조회
      * 내가 스크랩 한 글 갯수
      * 내 피드들 조회
+     * 마이페이지- 프로필사진, 닉네임 데이터 줄때 나의 기록 총 게시글 개수도 같이 보내줘
+     *
      * @param userIdx
      * @return
      */
@@ -41,23 +45,25 @@ public class UserService {
 
     /**
      * 회원 정보 저장
-     * @param user
+     * todo : 롤백 처리, 이미지 업로드
+     *
      * @return
      */
-    public DefaultRes saveUser(final User user){
+    public DefaultRes saveUser(final SignUpReq signUpReq) {
         try {
             AES256Util aes256Util = new AES256Util("MOJI-SERVER-ENCRYPT-TEST");
-            user.setPassword(aes256Util.encrypt(user.getPassword()));
-            userRepository.save(user);
+            signUpReq.setPassword(aes256Util.encrypt(signUpReq.getPassword()));
+            userRepository.save(signUpReq.toUser());
             return DefaultRes.res(StatusCode.CREATED, "회원 가입 완료");
         } catch (Exception e) {
-            System.out.println(e);
+            log.error(e.getMessage());
             return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
         }
     }
 
     /**
      * 이메일 중복 확인
+     *
      * @param email
      * @return
      */
@@ -68,6 +74,7 @@ public class UserService {
 
     /**
      * 이메일 중복 확인
+     *
      * @param nickName
      * @return
      */
