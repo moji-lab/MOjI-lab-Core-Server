@@ -1,9 +1,9 @@
 package com.moji.server.service;
 
 import com.moji.server.domain.*;
-import com.moji.server.domain.SearchResult.BoardSearchResult;
+import com.moji.server.domain.SearchResult.CourseSearchResult;
 import com.moji.server.model.DefaultRes;
-import com.moji.server.model.SearchRes.SearchBoardRes;
+import com.moji.server.model.SearchRes.SearchCourseRes;
 import com.moji.server.repository.*;
 import com.moji.server.util.StatusCode;
 import org.springframework.stereotype.Service;
@@ -16,60 +16,63 @@ import java.util.Optional;
 @Service
 public class HomeService {
     private final CourseService courseService;
-    private final BoardRepository boardRepository;
+    private final CourseRepository courseRepository;
     private final HashtagRepository hashtagRepository;
     private final HashtagCourseRepository hashtagCourseRepository;
     private final UserRepository userRepository;
-    private final LikeBoardRepository likeBoardRepository;
+    private final LikeCourseRepository likeCourseRepository;
 
     public HomeService(final CourseService courseService,
-                       final BoardRepository boardRepository,
+                       final CourseRepository courseRepository,
                        final HashtagRepository hashtagRepository,
                        final HashtagCourseRepository hashtagCourseRepository,
                        final UserRepository userRepository,
-                       final LikeBoardRepository likeBoardRepository){
+                       final LikeCourseRepository likeCourseRepository) {
         this.courseService = courseService;
-        this.boardRepository = boardRepository;
+        this.courseRepository = courseRepository;
         this.hashtagRepository = hashtagRepository;
         this.hashtagCourseRepository = hashtagCourseRepository;
         this.userRepository = userRepository;
-        this.likeBoardRepository = likeBoardRepository;
+        this.likeCourseRepository = likeCourseRepository;
     }
 
-    // 고정된 키워드에 해당하는 기록하기 조회
-    public DefaultRes getBoardsByFixedKeywords(final List<String> keywords) {
-        for (int i = 0; i < keywords.size(); i++) {
-            Optional<Hashtag> hashtag = hashtagRepository.findByTagInfo(keywords.get(i));
-            if (hashtag.isPresent()) {
-                List<String> courseIdxList = new ArrayList<>();
-                List<HashtagCourse> hashtagCourses =
-                        hashtagCourseRepository.findAllBytagIdx(hashtag.get().get_id()).get();
-                for (int j = 0; j < hashtagCourses.size(); j++) {
-                    courseIdxList.add(hashtagCourses.get(j).getCourseIdx());
+    // 고정된 키워드에 해당하는 코스 조회
+    public DefaultRes getCoursesByFixedKeywords(final List<String> keywords) {
+        try {
+            List<SearchCourseRes> searchCourseResList = new ArrayList<>();
+            for (int i = 0; i < keywords.size(); i++) {
+                Optional<Hashtag> hashtag = hashtagRepository.findByTagInfo(keywords.get(i));
+                if (hashtag.isPresent()) {
+                    List<String> courseIdxList = new ArrayList<>();
+                    List<HashtagCourse> hashtagCourses =
+                            hashtagCourseRepository.findAllBytagIdx(hashtag.get().get_id()).get();
+                    for (int j = 0; j < hashtagCourses.size(); j++) {
+                        courseIdxList.add(hashtagCourses.get(j).getCourseIdx());
+                    }
+                    List<CourseSearchResult> courses = new ArrayList<>();
+                    for (int k = 0; k < courseIdxList.size(); k++) {
+                        CourseSearchResult courseSearchResult = new CourseSearchResult();
+                        Course course = courseRepository.findBy_id(courseIdxList.get(k));
+                        courseSearchResult.setCourse(course);
+                        courseSearchResult.setWriter(userRepository.findByUserIdx(course.getUserIdx()));
+                        courseSearchResult.setLikeCount(likeCourseRepository.countByCourseIdx(course.get_id()));
+                        courses.add(courseSearchResult);
+                    }
+                    if (courses.size() == 0) return DefaultRes.res(StatusCode.NOT_FOUND, "해당 키워드의 코스가 없습니다.");
+                    else {
+                        Collections.sort(courses);
+                        SearchCourseRes searchCourseRes = new SearchCourseRes(courses);
+                        searchCourseResList.add(searchCourseRes);
+                    }
+                } else {
+                    return DefaultRes.res(StatusCode.NOT_FOUND, "해당 키워드에 해당되는 해시태그가 등록되어 있지 않습니다.");
                 }
-                List<String> boardIdxList = new ArrayList<>();
-                for (String courseIdx : courseIdxList) {
-                    boardIdxList.add(courseService.getCourse(courseIdx).getBoardIdx());
-                }
-                List<BoardSearchResult> boards = new ArrayList<>();
-                for (int k = 0; k < boardIdxList.size(); k++) {
-                    BoardSearchResult boardSearchResult = new BoardSearchResult();
-                    Board board = boardRepository.findBy_id(boardIdxList.get(k));
-                    boardSearchResult.setBoard(board);
-                    boardSearchResult.setWriter(userRepository.findByUserIdx(board.getUserIdx()));
-                    boardSearchResult.setLikeCount(likeBoardRepository.countByBoardIdx(board.get_id()));
-                    boards.add(boardSearchResult);
-                }
-                if (boards.size() == 0) return DefaultRes.res(StatusCode.NOT_FOUND, "해당 키워드의 기록하기가 없습니다.");
-                else {
-                    Collections.sort(boards);
-                    SearchBoardRes searchBoardRes = new SearchBoardRes(boards);
-                    return DefaultRes.res(StatusCode.OK, "조회 성공", searchBoardRes);
-                }
-            } else {
-                return DefaultRes.res(StatusCode.NOT_FOUND, "조회 실패");
             }
+            return DefaultRes.res(StatusCode.OK, "키워드에 해당되는 코스 조회 성공", searchCourseResList);
+        } catch (Exception e) {
+            return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
         }
-        return DefaultRes.res(StatusCode.NOT_FOUND, "조회 실패");
     }
 }
+
+

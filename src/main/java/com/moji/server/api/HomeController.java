@@ -27,12 +27,12 @@ public class HomeController {
         this.homeService = homeService;
     }
 
-    // 키워드에 맞는 기록하기 조회(홈)
+    // 키워드에 맞는 코스 조회(홈)
     @PostMapping("/home")
     public ResponseEntity<DefaultRes> getHomeData(@RequestBody HomeReq homeReq) {
         try {
             List<String> keywords = homeReq.getKeywords();
-            return new ResponseEntity<>(homeService.getBoardsByFixedKeywords(keywords), HttpStatus.OK);
+            return new ResponseEntity<>(homeService.getCoursesByFixedKeywords(keywords), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
