@@ -16,6 +16,6 @@ public class Scrap {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int scrapIdx;
-    private int boardIdx;
+    private String boardIdx;
     private int userIdx;
 }
