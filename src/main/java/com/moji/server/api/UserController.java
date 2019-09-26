@@ -1,6 +1,5 @@
 package com.moji.server.api;
 
-import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.SignUpReq;
 import com.moji.server.service.UserService;
@@ -8,8 +7,9 @@ import com.moji.server.util.auth.Auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;

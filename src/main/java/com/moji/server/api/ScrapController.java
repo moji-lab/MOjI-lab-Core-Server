@@ -29,10 +29,12 @@ public class ScrapController {
 
     @Auth
     @PostMapping("/scrap")
-    public ResponseEntity<DefaultRes> scrap(final HttpServletRequest httpServletRequest,
+    public ResponseEntity<DefaultRes> scrap(
+            final HttpServletRequest httpServletRequest,
             @RequestBody final ScrapReq scrapReq) {
         try {
-            return new ResponseEntity<>(scrapService.scrap(), HttpStatus.OK);
+            scrapReq.setUserIdx((int) httpServletRequest.getAttribute("userIdx"));
+            return new ResponseEntity<>(scrapService.scrap(scrapReq), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);

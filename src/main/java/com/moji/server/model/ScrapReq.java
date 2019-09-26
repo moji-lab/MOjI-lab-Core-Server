@@ -1,5 +1,6 @@
 package com.moji.server.model;
 
+import com.moji.server.domain.Scrap;
 import lombok.Data;
 
 /**
@@ -8,5 +9,15 @@ import lombok.Data;
 
 @Data
 public class ScrapReq {
+    private int scrapIdx;
+    private int boardIdx;
+    private int userIdx;
 
+    public Scrap toScrap() {
+        Scrap scrap = new Scrap();
+        scrap.setBoardIdx(boardIdx);
+        scrap.setScrapIdx(scrapIdx);
+        scrap.setUserIdx(userIdx);
+        return scrap;
+    }
 }
