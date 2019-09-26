@@ -1,12 +1,6 @@
-//POST http://127.0.0.1:8080/users
-POST http://bghgu.tk:8080/users
-Content-Type: application/json
+POST http://127.0.0.1:8080/users
+Content-Type: Multipart-form/data
 
-{
-  "email": "ㅁㅇㄴㅇㄹ",
-  "password": "1234",
-  "nickname" : "ㄹㄴㅇㄹㄴㅇㄹ",
-  "photoUrl" : "121212"
-}
+< ../../http/signUp.json
 
 ###

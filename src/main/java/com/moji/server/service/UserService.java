@@ -1,8 +1,10 @@
 package com.moji.server.service;
 
+import com.moji.server.domain.SignUp;
 import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.SignUpReq;
+import com.moji.server.repository.SignUpRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.AES256Util;
 import com.moji.server.util.StatusCode;
@@ -20,19 +22,20 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final SignUpRepository signUpRepository;
 
     private final S3FileUploadService s3FileUploadService;
 
-    public UserService(final UserRepository userRepository, final S3FileUploadService s3FileUploadService) {
+    public UserService(final UserRepository userRepository,
+                       final S3FileUploadService s3FileUploadService,
+                       final SignUpRepository signUpRepository) {
         this.userRepository = userRepository;
         this.s3FileUploadService = s3FileUploadService;
+        this.signUpRepository = signUpRepository;
     }
 
     /**
      * 마이 페이지 조회
-     * 내가 스크랩 한 글 갯수
-     * 내 피드들 조회
-     * 마이페이지- 프로필사진, 닉네임 데이터 줄때 나의 기록 총 게시글 개수도 같이 보내줘
      *
      * @param userIdx
      * @return
@@ -45,6 +48,7 @@ public class UserService {
 
     /**
      * 회원 프로필 사진 조회
+     *
      * @param userIdx
      * @return
      */
@@ -63,7 +67,18 @@ public class UserService {
         try {
             AES256Util aes256Util = new AES256Util("MOJI-SERVER-ENCRYPT-TEST");
             signUpReq.setPassword(aes256Util.encrypt(signUpReq.getPassword()));
-            userRepository.save(signUpReq.toUser());
+            SignUp signUp = SignUp.builder()
+                    .email(signUpReq.getEmail())
+                    .password(signUpReq.getPassword())
+                    .nickname(signUpReq.getNickname())
+                    .photoUrl(signUpReq.getPhotoUrl())
+                    .build();
+            if (signUpReq.getProfile() != null) {
+                log.info("image upload");
+                signUp.setPhotoUrl(s3FileUploadService.upload(signUpReq.getProfile()));
+                signUp.setPhotoUrl("https://project-moji2.s3.ap-northeast-2.amazonaws.com/cb110d18590fb2d338117e43667a7e53.jpg");
+            }
+            signUpRepository.save(signUp);
             return DefaultRes.res(StatusCode.CREATED, "회원 가입 완료");
         } catch (Exception e) {
             log.error(e.getMessage());

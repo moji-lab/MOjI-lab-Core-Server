@@ -1,11 +1,14 @@
 package com.moji.server.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 /**
- * Created By ds on 2019-08-20.
+ * Created By ds on 26/09/2019.
  */
 
 @Data
@@ -14,7 +17,7 @@ import javax.persistence.*;
 @Entity
 @Builder
 @Table(name = "USER")
-public class User {
+public class SignUp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +26,5 @@ public class User {
     private String nickname;
     private String email;
     private String photoUrl;
+    private String password;
 }

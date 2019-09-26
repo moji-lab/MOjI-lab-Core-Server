@@ -4,7 +4,6 @@ import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.repository.CourseRepository;
 import com.moji.server.repository.ScrapRepository;
-import com.moji.server.repository.ShareRepository;
 import com.moji.server.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,17 +18,14 @@ public class MyPageService {
 
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
-    private final ShareRepository shareRepository;
     private final ScrapRepository scrapRepository;
 
     public MyPageService(final UserRepository userRepository,
                          final CourseRepository courseRepository,
-                         final ShareRepository shareRepository,
                          final ScrapRepository scrapRepository) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.scrapRepository = scrapRepository;
-        this.shareRepository = shareRepository;
     }
 
     /**
