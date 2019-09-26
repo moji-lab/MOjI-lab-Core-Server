@@ -10,8 +10,12 @@ import com.moji.server.util.AES256Util;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Optional;
+
+import static com.moji.server.model.DefaultRes.DB_ERROR;
 
 /**
  * Created By ds on 2019-08-20.
@@ -59,10 +63,10 @@ public class UserService {
 
     /**
      * 회원 정보 저장
-     * todo : 롤백 처리, 이미지 업로드
-     *
+     * @param signUpReq
      * @return
      */
+    @Transactional
     public DefaultRes saveUser(final SignUpReq signUpReq) {
         try {
             AES256Util aes256Util = new AES256Util("MOJI-SERVER-ENCRYPT-TEST");
@@ -82,7 +86,8 @@ public class UserService {
             return DefaultRes.res(StatusCode.CREATED, "회원 가입 완료");
         } catch (Exception e) {
             log.error(e.getMessage());
-            return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
         }
     }
 

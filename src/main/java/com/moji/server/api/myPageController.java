@@ -42,7 +42,7 @@ public class myPageController {
     public ResponseEntity<DefaultRes> getMyPage(final HttpServletRequest httpServletRequest,
                                                 @PathVariable final String index) {
         try {
-            int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             DefaultRes res = null;
             switch (index) {
                 case "1": {

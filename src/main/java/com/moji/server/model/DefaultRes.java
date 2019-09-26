@@ -48,5 +48,5 @@ public class DefaultRes<T> {
     public static final DefaultRes NOT_FOUNT = new DefaultRes(404, "NOT_FOUNT");
     public static final DefaultRes FAIL_DEFAULT_RES = new DefaultRes(500, "INTERNAL_SERVER_ERROR");
     public static final DefaultRes SERVICE_UNAVAILABLE = new DefaultRes(503, "SERVICE_UNAVAILABLE");
-
+    public static final DefaultRes DB_ERROR = new DefaultRes(600, "DB_ERROR");
 }
