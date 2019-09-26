@@ -4,12 +4,15 @@ import com.moji.server.domain.Course;
 import com.moji.server.domain.Scrap;
 import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
+import com.moji.server.model.MyPageRes;
 import com.moji.server.repository.CourseRepository;
 import com.moji.server.repository.ScrapRepository;
 import com.moji.server.repository.UserRepository;
+import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,34 +44,52 @@ public class MyPageService {
      */
 
     public DefaultRes getMyCourseList(final int userIdx) {
-        myInfo myInfo = getMyPageDefaultInfo(userIdx);
-        return null;
+        defaultInfo defaultInfo = getMyPageDefaultInfo(userIdx);
+        MyPageRes<Course> myPageRes = new MyPageRes<>();
+        myPageRes.setNickname(defaultInfo.nickname);
+        myPageRes.setProfileUrl(defaultInfo.profileUrl);
+        myPageRes.setCourseCount(defaultInfo.courseList.size());
+        myPageRes.setScrapCount(defaultInfo.scrapList.size());
+        myPageRes.setFeedList(defaultInfo.courseList);
+        return DefaultRes.res(StatusCode.OK, "조회 성공", myPageRes);
     }
 
     public DefaultRes getMyScrapCourseList(final int userIdx) {
-        myInfo myInfo = getMyPageDefaultInfo(userIdx);
-        return null;
+        defaultInfo defaultInfo = getMyPageDefaultInfo(userIdx);
+        MyPageRes<Course> myPageRes = new MyPageRes<>();
+        myPageRes.setNickname(defaultInfo.nickname);
+        myPageRes.setProfileUrl(defaultInfo.profileUrl);
+        myPageRes.setCourseCount(defaultInfo.courseList.size());
+        myPageRes.setScrapCount(defaultInfo.scrapList.size());
+
+        List<Course> courseList = new LinkedList<>();
+
+        for (Scrap s : defaultInfo.scrapList) {
+            courseList.add(courseRepository.findBy_id(s.getBoardIdx()));
+        }
+
+        return DefaultRes.res(StatusCode.OK, "조회 성공", courseList);
     }
 
     //기본으로 프로필 사진, 닉네임, 나의 기록(친구와 공유), 스크랩 한 글 갯수 포함
-    private myInfo getMyPageDefaultInfo(final int userIdx) {
+    private defaultInfo getMyPageDefaultInfo(final int userIdx) {
         Optional<User> user = userRepository.findByUserIdx(userIdx);
         List<Scrap> scrapList = scrapRepository.findByUserIdx(userIdx);
         List<Course> courseList = courseRepository.findByUserIdx(userIdx);
-        return new myInfo(user.get().getPhotoUrl(), user.get().getNickname(), courseList.size(), scrapList.size());
+        return new defaultInfo(user.get().getPhotoUrl(), user.get().getNickname(), courseList, scrapList);
     }
 
-    private static class myInfo {
+    private static class defaultInfo {
         private String profileUrl;
         private String nickname;
-        private int courseCount;
-        private int scrapCount;
+        private List<Course> courseList;
+        private List<Scrap> scrapList;
 
-        myInfo(final String profileUrl, final String nickname, final int courseCount, final int scrapCount) {
+        defaultInfo(final String profileUrl, final String nickname, final List<Course> courseList, final List<Scrap> scrapList) {
             this.profileUrl = profileUrl;
             this.nickname = nickname;
-            this.courseCount = courseCount;
-            this.scrapCount = scrapCount;
+            this.courseList = courseList;
+            this.scrapList = scrapList;
         }
     }
 }
