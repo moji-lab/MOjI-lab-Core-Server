@@ -8,7 +8,6 @@ import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -126,8 +125,9 @@ public class BoardService {
             List<FeedRes> feedResList = new ArrayList<>();
             for (int i = 0; i < boardList.size(); i++) {
                 Board board = boardList.get(i);
-                User user = userRepository.findByUserIdx(board.getUserIdx());
-                if (user == null) {
+                Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
+
+                if(!user.isPresent()) {
                     continue;
                 }
 
@@ -143,8 +143,8 @@ public class BoardService {
                 }
 
                 FeedRes feedRes = new FeedRes();
-                feedRes.setNickName(user.getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
-                feedRes.setProfileUrl(user.getPhotoUrl());
+                feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
+                feedRes.setProfileUrl(user.get().getPhotoUrl());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
                 feedRes.setPhotoList(photoList);
@@ -164,14 +164,14 @@ public class BoardService {
     public DefaultRes<BoardRes> getBoardInfo(String boardIdx, int userIdx) {
         try {
             BoardRes boardRes = new BoardRes();
-            User user = userRepository.findByUserIdx(userIdx);
+            Optional<User> user = userRepository.findByUserIdx(userIdx);
             Board board = boardRepository.findBy_id(boardIdx);
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
             }
 
-            boardRes.setUser(user);
+            boardRes.setUser(user.get());
             boardRes.set_id(boardIdx);
             boardRes.setWriteTime(board.getWriteTime());
             boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
