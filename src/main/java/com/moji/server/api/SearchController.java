@@ -3,6 +3,7 @@ package com.moji.server.api;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.SearchReq;
 import com.moji.server.service.SearchService;
+import com.moji.server.service.TourApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class SearchController {
 
     private final SearchService searchService;
+    private final TourApiService tourApiService;
 
-    public SearchController(final SearchService searchService) {
+    public SearchController(final SearchService searchService,
+                            final TourApiService tourApiService) {
         this.searchService = searchService;
+        this.tourApiService = tourApiService;
     }
 
     // 검색

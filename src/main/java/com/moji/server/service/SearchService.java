@@ -125,6 +125,5 @@ public class SearchService {
         else{
             return DefaultRes.res(StatusCode.NOT_FOUND, "검색 실패");
         }
-
     }
 }
