@@ -37,7 +37,7 @@ public class BoardController {
             return new ResponseEntity<>(boardService.saveBoard(board, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
-            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -73,7 +73,7 @@ public class BoardController {
             return new ResponseEntity<>(boardService.getSharePerson(person), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
-            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

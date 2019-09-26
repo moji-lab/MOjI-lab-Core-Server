@@ -10,4 +10,5 @@ public class PersonRes {
     private String email;
     private String nickname;
     private int userIdx;
+    private String photoUrl;
 }

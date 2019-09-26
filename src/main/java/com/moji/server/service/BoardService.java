@@ -63,7 +63,7 @@ public class BoardService {
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
         } catch (Exception e) {
             log.info(e.getMessage());
-            return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
+            return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.FAIL_CREATE_BOARD);
         }
     }
 
@@ -101,12 +101,14 @@ public class BoardService {
                 personRes.get().setEmail(email.get().getEmail());
                 personRes.get().setNickname(email.get().getNickname());
                 personRes.get().setUserIdx(email.get().getUserIdx());
+                personRes.get().setPhotoUrl(email.get().getPhotoUrl());
             }
             else
             {
                 personRes.get().setEmail(nickname.get().getEmail());
                 personRes.get().setNickname(nickname.get().getNickname());
                 personRes.get().setUserIdx(nickname.get().getUserIdx());
+                personRes.get().setPhotoUrl(nickname.get().getPhotoUrl());
             }
 
             return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", personRes);
