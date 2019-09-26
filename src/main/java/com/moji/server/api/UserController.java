@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<DefaultRes> signUp(@RequestBody final SignUpReq signUpReq) {
+    public ResponseEntity<DefaultRes> signUp(final SignUpReq signUpReq) {
         try {
             log.info(signUpReq.toString());
             return new ResponseEntity<>(userService.saveUser(signUpReq), HttpStatus.OK);
