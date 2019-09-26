@@ -40,11 +40,13 @@ public class HashtagService {
                 HashtagCourse hashtagCourse = new HashtagCourse();
                 hashtagCourse.setTagIdx(tagIdx);
                 hashtagCourse.setCourseIdx(courseIdx);
-                if(selectedHashtag.isPresent()){ // 이미 등록된 해시태그일 경우
+                if(selectedHashtag.isPresent()){
+                    // 이미 등록된 해시태그일 경우(HashtagCourse 테이블에 저장)
                     hashtagCourse.setTagIdx(selectedHashtag.get().get_id());
                     hashtagCourseRepository.save(hashtagCourse);
                 }
-                else{ // 새로 해시태그 등록하는 경우
+                else{
+                    // 새로 해시태그 등록하는 경우(Hashtag, HashtagCourse 테이블에 저장)
                     String savedId = hashtagRepository.save(hashtag).get_id();
                     hashtagCourse.setTagIdx(savedId);
                     hashtagCourseRepository.save(hashtagCourse);
