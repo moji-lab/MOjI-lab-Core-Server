@@ -54,7 +54,7 @@ public class HomeService {
                         CourseSearchResult courseSearchResult = new CourseSearchResult();
                         Course course = courseRepository.findBy_id(courseIdxList.get(k));
                         courseSearchResult.setCourse(course);
-                        courseSearchResult.setWriter(userRepository.findByUserIdx(course.getUserIdx()));
+                        courseSearchResult.setWriter(userRepository.findByUserIdx(course.getUserIdx()).get());
                         courseSearchResult.setLikeCount(likeCourseRepository.countByCourseIdx(course.get_id()));
                         courses.add(courseSearchResult);
                     }

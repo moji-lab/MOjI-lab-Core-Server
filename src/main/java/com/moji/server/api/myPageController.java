@@ -46,11 +46,11 @@ public class myPageController {
             DefaultRes res = null;
             switch (index) {
                 case "1": {
-                    //res = myPageService.getMyCourseList(user);
+                    res = myPageService.getMyCourseList(userIdx);
                     break;
                 }
                 case "2": {
-                    res = new DefaultRes(2, "2");
+                    res = myPageService.getMyScrapCourseList(userIdx);
                     break;
                 }
                 default: {

@@ -13,7 +13,7 @@ import java.util.*;
  */
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    User findByUserIdx(int userIdx);
+    Optional<User> findByUserIdx(int userIdx);
 
     Optional<User> findByNickname(String name);
 
