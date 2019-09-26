@@ -1,8 +1,6 @@
 package com.moji.server.model;
 
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,8 +9,6 @@ import java.util.List;
  */
 
 @Data
-@NoArgsConstructor
-@Builder
 public class MyPageRes<T> {
     private String nickname;
     private String profileUrl;
