@@ -17,4 +17,5 @@ public class FeedRes {
     private boolean isLiked;
     private int likeCount;
     private int commentCount;
+    private String mainAddress;
 }

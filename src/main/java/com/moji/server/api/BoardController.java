@@ -3,7 +3,6 @@ package com.moji.server.api;
 import com.moji.server.model.BoardReq;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.service.BoardService;
-import com.moji.server.service.CourseService;
 import com.moji.server.util.auth.Auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,20 +19,18 @@ import javax.servlet.http.HttpServletRequest;
 public class BoardController {
 
     private final BoardService boardService;
-    private final CourseService courseService;
 
-    public BoardController(final BoardService boardService,
-                           final CourseService courseService) {
+    public BoardController(final BoardService boardService) {
         this.boardService = boardService;
-        this.courseService = courseService;
     }
 
     //게시물 등록
     @Auth
     @PostMapping("boards")
-    public ResponseEntity<DefaultRes> saveBoard(final BoardReq board, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<DefaultRes> saveBoard(final BoardReq board,
+                                                final HttpServletRequest httpServletRequest) {
         try {
-            int userIdx = (int)httpServletRequest.getAttribute("userIdx");
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.saveBoard(board, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
@@ -41,10 +38,11 @@ public class BoardController {
         }
     }
 
+    @Auth
     @GetMapping("/boards")
-    public ResponseEntity<DefaultRes> getRandomBoards(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<DefaultRes> getRandomBoards(final HttpServletRequest httpServletRequest) {
         try {
-            int userIdx = (int)httpServletRequest.getAttribute("userIdx");
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.getRecentFeed(userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
@@ -56,9 +54,9 @@ public class BoardController {
     @GetMapping("/boards/{boardIdx}")
     public ResponseEntity<DefaultRes> getBoardsInfo(
             @PathVariable(value = "boardIdx") final String boardIdx,
-            HttpServletRequest httpServletRequest) {
+            final HttpServletRequest httpServletRequest) {
         try {
-            int userIdx = (int)httpServletRequest.getAttribute("userIdx");
+            int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.getBoardInfo(boardIdx, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
