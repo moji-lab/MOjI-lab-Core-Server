@@ -1,0 +1,6 @@
+POST http://127.0.0.1:8080/users
+Content-Type: Multipart-form/data
+
+< ../../http/signUp.json
+
+###

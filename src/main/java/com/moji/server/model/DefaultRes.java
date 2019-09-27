@@ -22,15 +22,13 @@ public class DefaultRes<T> {
         this(status, message, null);
     }
 
-    public static<T> DefaultRes<T> res(final int status, final String message) {
+    public static <T> DefaultRes<T> res(final int status, final String message) {
         return res(status, message, null);
     }
 
-    public static<T> DefaultRes<T> res(final int status, final String message, final T t) {
+    public static <T> DefaultRes<T> res(final int status, final String message, final T t) {
         return new DefaultRes<T>(status, message, t);
     }
-
-    public static final DefaultRes FAIL_DEFAULT_RES = new DefaultRes(500, "INTERNAL_SERVER_ERROR");
 
     public int getStatus() {
         return status;
@@ -43,4 +41,12 @@ public class DefaultRes<T> {
     public T getData() {
         return data;
     }
+
+    public static final DefaultRes BAD_REQUEST = new DefaultRes(400, "BAD_REQUEST");
+    public static final DefaultRes UNAUTHORIZED = new DefaultRes(401, "UNAUTHORIZED");
+    public static final DefaultRes FORBIDDEN = new DefaultRes(403, "FORBIDDEN");
+    public static final DefaultRes NOT_FOUNT = new DefaultRes(404, "NOT_FOUNT");
+    public static final DefaultRes FAIL_DEFAULT_RES = new DefaultRes(500, "INTERNAL_SERVER_ERROR");
+    public static final DefaultRes SERVICE_UNAVAILABLE = new DefaultRes(503, "SERVICE_UNAVAILABLE");
+    public static final DefaultRes DB_ERROR = new DefaultRes(600, "DB_ERROR");
 }
