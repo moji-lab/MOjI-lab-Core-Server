@@ -8,5 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface HashtagRepository extends MongoRepository<Hashtag, String> {
-    Optional <List<Hashtag>> findByTagInfoContaining(final String tag);
+    Optional <List<Hashtag>> findAllByTagInfoContaining(final String tag);
+    Optional<Hashtag> findByTagInfo(final String tagInfo);
 }

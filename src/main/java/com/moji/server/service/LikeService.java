@@ -22,7 +22,7 @@ public class LikeService {
 
     public LikeService(
             @Lazy final BoardService boardService,
-            final CourseService courseService,
+            @Lazy final CourseService courseService,
             final LikeCourseRepository likeCourseRepository,
             final LikeBoardRepository likeBoardRepository) {
         this.boardService = boardService;
@@ -50,7 +50,7 @@ public class LikeService {
             if (savedLikeBoard == null) {
                 LikeBoard likeBoard = new LikeBoard();
                 likeBoard.setBoardIdx(likeReq.getPostIdx());
-//                likeCourse.setUserIdx(likeReq.getUserIdx());
+                likeBoard.setUserIdx(likeReq.getUserIdx());
                 likeBoardRepository.save(likeBoard);
             } else { // 기존에 좋아요를 한 경우
                 responseMessage = ResponseMessage.SUCCESS_UNLIKE;
@@ -82,7 +82,7 @@ public class LikeService {
             if (savedLikeCourse == null) {
                 LikeCourse likeCourse = new LikeCourse();
                 likeCourse.setCourseIdx(likeReq.getPostIdx());
-//                likeCourse.setUserIdx(likeReq.getUserIdx());
+                likeCourse.setUserIdx(likeReq.getUserIdx());
                 likeCourseRepository.save(likeCourse);
             } else { // 기존에 좋아요를 한 경우
                 responseMessage = ResponseMessage.SUCCESS_UNLIKE;
@@ -97,5 +97,15 @@ public class LikeService {
 
     public int getBoardLikeCount(String boardIdx) {
         return likeBoardRepository.countByBoardIdx(boardIdx);
+    }
+    public int getCourseLikeCount(String courseIdx) {
+        return likeCourseRepository.countByCourseIdx(courseIdx);
+    }
+
+    public boolean isLikedBoard(String boardIdx, int userIdx) {
+        return likeBoardRepository.findByBoardIdxAndUserIdx(boardIdx, userIdx) != null;
+    }
+    public boolean isLikedCourse(String courseIdx, int userIdx) {
+        return likeCourseRepository.findByCourseIdxAndUserIdx(courseIdx, userIdx) != null;
     }
 }

@@ -80,7 +80,7 @@ public class CommentService {
     private Comment setComments(CommentReq commentReq) {
         Comment comment = new Comment();
         comment.setContent(commentReq.getContent());
-//        comment.setUserIdx(1);
+        comment.setUserIdx(commentReq.getUserIdx());
         comment.setWriteTime(new Date());
 
         return comment;

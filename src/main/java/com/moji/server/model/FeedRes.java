@@ -14,6 +14,7 @@ public class FeedRes {
     private String boardIdx;
     private List<Photo> photoList;
     private String place;
+    private boolean isLiked;
     private int likeCount;
     private int commentCount;
 }

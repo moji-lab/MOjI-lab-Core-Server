@@ -70,7 +70,7 @@ public class S3FileUploadService {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    //S3에 파일을 업로드한다.
+    // S3에 파일을 업로드한다.
     private void uploadOnS3(final String fileName, final File file) {
         final TransferManager transferManager = new TransferManager(this.amazonS3Client);
         final PutObjectRequest request = new PutObjectRequest(bucket, fileName, file);

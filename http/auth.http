@@ -1,0 +1,23 @@
+GET http://127.0.0.1:8080/test
+
+###
+
+POST http://127.0.0.1:8080/login
+Content-Type: application/json
+
+{
+  "email": "ds",
+  "password": "1234"
+}
+
+###
+
+GET http://127.0.0.1:8080/auth-check
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJtb2ppIiwidXNlcl9JZHgiOjR9.r7tGVCEj3eMkwN-2t4wWBAuExzeC9vB622KE7PXkBNc
+
+###
+
+GET http://127.0.0.1:8080/auth-check
+
+###

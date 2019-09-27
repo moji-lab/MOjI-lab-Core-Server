@@ -1,6 +1,5 @@
 package com.moji.server.api;
 
-import com.moji.server.domain.Hashtag;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.HashtagReq;
 import com.moji.server.service.HashtagService;

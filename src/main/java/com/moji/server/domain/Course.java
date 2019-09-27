@@ -2,17 +2,17 @@ package com.moji.server.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -25,8 +25,10 @@ public class Course {
 
     private String mainAddress;
     private String subAddress;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime writeTime;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate visitTime;
+  
     private String content;
     private int order;
     private List<String> tagInfo = new ArrayList<String>();
@@ -37,13 +39,11 @@ public class Course {
     private String boardIdx;
 
     @Field
-    private int userIdx=1;
+    private int userIdx;
 
     //사진
     private List<Photo> photos = new ArrayList<Photo>();
 
     //댓글
     private List<Comment> comments = new ArrayList<Comment>();
-
-    //해시태그
 }

@@ -29,10 +29,8 @@ public class Board {
     private Date writeTime;
     private boolean open;
 
-    @Field
-    private int userIdx = 1;
+    private int userIdx;
 
-    @Field
     //공유 친구
     private List<Integer> share = new ArrayList<Integer>();
 
