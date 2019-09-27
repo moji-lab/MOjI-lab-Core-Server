@@ -33,7 +33,7 @@ public class ScrapService {
     public DefaultRes scrap(final ScrapReq scrapReq) {
         try {
             scrapRepository.save(scrapReq.toScrap());
-            return DefaultRes.res(203, "Scrap 성공");
+            return DefaultRes.res(StatusCode.NO_CONTENT, "스크랩 성공");
         } catch (Exception e) {
             log.error(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

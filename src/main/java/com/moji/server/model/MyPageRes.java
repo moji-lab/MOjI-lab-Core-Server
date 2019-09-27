@@ -12,7 +12,7 @@ import java.util.List;
 public class MyPageRes<T> {
     private String nickname;
     private String profileUrl;
-    private int courseCount;
+    private int boardCount;
     private int scrapCount;
     private List<T> feedList;
 }
