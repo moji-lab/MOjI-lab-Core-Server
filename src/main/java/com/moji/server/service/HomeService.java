@@ -50,18 +50,6 @@ public class HomeService {
             homeRes.setHotCategoryKeyword(hotCategoryKeyword);
             homeRes.setHotKeywords(hotKeywords); homeRes.setRecommendKeywords(recommendKeywords);
             homeRes.setTopKeywords(this.orderByCount(hashtagCourseRepository.findAll()));
-
-            Optional<List<SearchCourseRes>> hotKeywordSearchCourseResList = this.getCoursesByFixedKeywords(hotKeywords, userIdx);
-            Optional<List<SearchCourseRes>> recommendKeywordSearchCourseResList = this.getCoursesByFixedKeywords(recommendKeywords, userIdx);
-            if(hotKeywordSearchCourseResList.isPresent() &&
-                    recommendKeywordSearchCourseResList.isPresent()){
-                if(hotKeywordSearchCourseResList.get().size() == 0  ||
-                        recommendKeywordSearchCourseResList.get().size() == 0){
-                    return DefaultRes.res(StatusCode.NOT_FOUND, "홈 데이터가 없습니다.");
-                }
-            }
-            homeRes.setHotCourseSearchCourseRes(hotKeywordSearchCourseResList.get());
-            homeRes.setRecommendCourseSearchCourseRes(recommendKeywordSearchCourseResList.get());
             return DefaultRes.res(StatusCode.OK, "홈 조회 성공", homeRes);
         }
         catch(Exception e){
@@ -69,36 +57,6 @@ public class HomeService {
         }
     }
 
-    // 고정된 키워드에 해당하는 코스 조회
-    public Optional<List<SearchCourseRes>> getCoursesByFixedKeywords(final List<String> keywords,
-                                                                     final int userIdx) {
-        List<SearchCourseRes> searchCourseResList = new ArrayList<>();
-        for (int i = 0; i < keywords.size(); i++) {
-            Optional<Hashtag> hashtag = hashtagRepository.findByTagInfo(keywords.get(i));
-            if (hashtag.isPresent()) {
-                List<String> courseIdxList = new ArrayList<>();
-                List<HashtagCourse> hashtagCourses =
-                        hashtagCourseRepository.findAllBytagIdx(hashtag.get().get_id()).get();
-                for (int j = 0; j < hashtagCourses.size(); j++) {
-                    courseIdxList.add(hashtagCourses.get(j).getCourseIdx());
-                }
-                List<CourseSearchResult> courseSearchResultList = new ArrayList<>();
-                for (int k = 0; k < courseIdxList.size(); k++) {
-                    Course course = courseRepository.findBy_id(courseIdxList.get(k));
-                    CourseSearchResult courseSearchResult = new CourseSearchResult();
-                    courseSearchResult.setCourse(course);
-                    courseSearchResult.setLikeCount(likeService.getCourseLikeCount(course.get_id()));
-                    courseSearchResult.setLiked(likeService.isLikedCourse(course.get_id(), userIdx));
-                    courseSearchResult.setScraped(true);
-                    courseSearchResultList.add(courseSearchResult);
-                }
-                Collections.sort(courseSearchResultList);
-                SearchCourseRes searchCourseRes = new SearchCourseRes(courseSearchResultList);
-                searchCourseResList.add(searchCourseRes);
-            }
-        }
-        return Optional.ofNullable(searchCourseResList);
-    }
 
     public List<String> orderByCount(List<HashtagCourse> hashtagCourses){
         final Map<String, Integer> counter = new HashMap<String, Integer>();
@@ -112,7 +70,7 @@ public class HomeService {
                 return counter.get(y) - counter.get(x);
             }
         });
-        list.subList(0,5);
+        list = list.subList(0,5);
         List<String> tagInfoList = new ArrayList<>();
         for (String tagIdx : list) {
             tagInfoList.add(hashtagRepository.findById(tagIdx).get().getTagInfo());
