@@ -46,7 +46,7 @@ public class myPageController {
             DefaultRes res = null;
             switch (index) {
                 case "1": {
-                    res = myPageService.getMyCourseList(userIdx);
+                    res = myPageService.getMyBoardList(userIdx);
                     break;
                 }
                 case "2": {

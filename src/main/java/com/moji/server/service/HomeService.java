@@ -39,7 +39,7 @@ public class HomeService {
                                   final List<String> recommendKeywords){
         try{
             HomeRes homeRes = new HomeRes();
-            homeRes.setNickName(userRepository.findByUserIdx(userIdx).getNickname());
+            homeRes.setNickName(userRepository.findByUserIdx(userIdx).get().getNickname());
             homeRes.setHotCategoryKeyword(hotCategoryKeyword);
             homeRes.setHotKeywords(hotKeywords); homeRes.setRecommendKeywords(recommendKeywords);
             homeRes.setTopKeywords(this.orderByCount(hashtagCourseRepository.findAll()));

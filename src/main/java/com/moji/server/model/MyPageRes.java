@@ -9,10 +9,10 @@ import java.util.List;
  */
 
 @Data
-public class MyPageRes<T> {
+public class MyPageRes {
     private String nickname;
     private String profileUrl;
     private int boardCount;
     private int scrapCount;
-    private List<T> feedList;
+    private List<BoardRes> feedList;
 }

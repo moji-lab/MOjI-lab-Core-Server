@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -102,9 +99,7 @@ public class BoardService {
                 personRes.get().setNickname(email.get().getNickname());
                 personRes.get().setUserIdx(email.get().getUserIdx());
                 personRes.get().setPhotoUrl(email.get().getPhotoUrl());
-            }
-            else
-            {
+            } else {
                 personRes.get().setEmail(nickname.get().getEmail());
                 personRes.get().setNickname(nickname.get().getNickname());
                 personRes.get().setUserIdx(nickname.get().getUserIdx());
@@ -120,16 +115,25 @@ public class BoardService {
     }
 
     public DefaultRes getRecentFeed(int userIdx) {
-        try {
-            // TODO: 공개 대상인지 판단하여 공개 설정
-            List<Board> boardList = boardRepository.findByOpenOrderByWriteTimeDesc(true); // TODO: 값 조정될 필요성
+        return getDefault(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
+    }
 
+    public DefaultRes getBoardList(final int userIdx) {
+        return getDefault(userIdx, boardRepository.findByUserIdx(userIdx));
+    }
+
+    public DefaultRes getScrapList(final int userIdx, final List<Board> list) {
+        return getDefault(userIdx, list);
+    }
+
+    private DefaultRes getDefault(final int userIdx, final List<Board> boardList) {
+        try {
             List<FeedRes> feedResList = new ArrayList<>();
             for (int i = 0; i < boardList.size(); i++) {
                 Board board = boardList.get(i);
                 Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
 
-                if(!user.isPresent()) {
+                if (!user.isPresent()) {
                     continue;
                 }
 

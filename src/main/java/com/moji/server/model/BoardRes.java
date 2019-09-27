@@ -15,5 +15,6 @@ public class BoardRes {
     // user writeTime
     private Date writeTime;
 
+    private int like;
     List<CourseRes> courseList;
 }
