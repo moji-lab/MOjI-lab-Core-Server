@@ -2,6 +2,7 @@ package com.moji.server.repository;
 
 import com.moji.server.domain.Hashtag;
 import com.moji.server.domain.HashtagCourse;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;

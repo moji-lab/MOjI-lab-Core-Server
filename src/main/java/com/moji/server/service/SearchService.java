@@ -75,7 +75,6 @@ public class SearchService {
                     }
                     CourseSearchResult courseSearchResult = new CourseSearchResult();
                     courseSearchResult.setCourse(course);
-                    courseSearchResult.setWriter(userRepository.findByUserIdx(course.getUserIdx()));
                     courseSearchResult.setLikeCount(likeCourseRepository.countByCourseIdx(course.get_id()));
                     courses.add(courseSearchResult);
                 }
@@ -111,7 +110,6 @@ public class SearchService {
                     board = boardRepository.findBy_id(boardIdx);
                 }
                 boardSearchResult.setBoard(board);
-                boardSearchResult.setWriter(userRepository.findByUserIdx(board.getUserIdx()));
                 boardSearchResult.setLikeCount(likeBoardRepository.countByBoardIdx(board.get_id()));
                 boards.add(boardSearchResult);
             }
