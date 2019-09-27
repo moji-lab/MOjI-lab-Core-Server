@@ -15,10 +15,8 @@ public class HomeRes {
     private String hotCategoryKeyword;
 
     private List<String> hotKeywords;
-    private List<SearchCourseRes> hotCourseSearchCourseRes;
 
     private List<String> recommendKeywords;
-    private List<SearchCourseRes> recommendCourseSearchCourseRes;
 
     private List<String> topKeywords;
 }

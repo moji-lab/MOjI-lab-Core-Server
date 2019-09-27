@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface CourseRepository extends MongoRepository<Course, String> {
     Course findBy_id(String idx);
@@ -17,4 +18,7 @@ public interface CourseRepository extends MongoRepository<Course, String> {
     List<Course> findByBoardIdxAndPhotosRepresentOrderByOrderAsc(String boardIdx, boolean b);
 
     List<Course> findByUserIdx(final int userIdx);
+
+    Optional<List<Course>> findAllByMainAddressContaining(final String keyword);
+    Optional<List<Course>> findAllBySubAddressContaining(final String keyword);
 }

@@ -2,6 +2,9 @@ package com.moji.server.domain;
 
 import lombok.Data;
 
+import java.util.Date;
+import java.util.List;
+
 public class SearchResult {
     @Data
     static public class CourseSearchResult implements Comparable<CourseSearchResult> {
@@ -29,10 +32,14 @@ public class SearchResult {
 
     @Data
     static public class BoardSearchResult implements Comparable<BoardSearchResult>{
-        private Board board;
+        private String nickName;
+        private String profileUrl;
+        private Date date;
+        private String boardIdx;
+        private List<Photo> photoList;
+        private String place;
+        private boolean isLiked;
         private int likeCount;
-
-        // 댓글 기능 구현 후 추가
         private int commentCount;
 
         @Override
