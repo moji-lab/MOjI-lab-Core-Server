@@ -50,7 +50,7 @@ public class MyPageService {
         MyPageRes<Board> myPageRes = new MyPageRes<>();
         myPageRes.setNickname(defaultInfo.nickname);
         myPageRes.setProfileUrl(defaultInfo.profileUrl);
-        myPageRes.setCourseCount(defaultInfo.boardList.size());
+        myPageRes.setBoardCount(defaultInfo.boardList.size());
         myPageRes.setScrapCount(defaultInfo.scrapList.size());
         myPageRes.setFeedList(defaultInfo.boardList);
         return DefaultRes.res(StatusCode.OK, "조회 성공", myPageRes);
@@ -61,7 +61,7 @@ public class MyPageService {
         MyPageRes<Board> myPageRes = new MyPageRes<>();
         myPageRes.setNickname(defaultInfo.nickname);
         myPageRes.setProfileUrl(defaultInfo.profileUrl);
-        myPageRes.setCourseCount(defaultInfo.boardList.size());
+        myPageRes.setBoardCount(defaultInfo.boardList.size());
         myPageRes.setScrapCount(defaultInfo.scrapList.size());
 
         List<Board> courseList = new LinkedList<>();
