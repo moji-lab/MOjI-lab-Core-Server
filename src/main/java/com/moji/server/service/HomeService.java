@@ -2,6 +2,7 @@ package com.moji.server.service;
 
 import com.moji.server.domain.*;
 import com.moji.server.domain.SearchResult.CourseSearchResult;
+import com.moji.server.model.CourseRes;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.HomeRes;
 import com.moji.server.model.SearchRes;
@@ -19,17 +20,23 @@ public class HomeService {
     private final HashtagCourseRepository hashtagCourseRepository;
     private final UserRepository userRepository;
     private final LikeCourseRepository likeCourseRepository;
+    private final CourseService courseService;
+    private final LikeService likeService;
 
     public HomeService(final CourseRepository courseRepository,
                        final HashtagRepository hashtagRepository,
                        final HashtagCourseRepository hashtagCourseRepository,
                        final UserRepository userRepository,
-                       final LikeCourseRepository likeCourseRepository) {
+                       final LikeCourseRepository likeCourseRepository,
+                       final CourseService courseService,
+                       final LikeService likeService) {
         this.courseRepository = courseRepository;
         this.hashtagRepository = hashtagRepository;
         this.hashtagCourseRepository = hashtagCourseRepository;
         this.userRepository = userRepository;
         this.likeCourseRepository = likeCourseRepository;
+        this.courseService = courseService;
+        this.likeService = likeService;
     }
 
     // 홈 화면 데이터 조회
@@ -44,8 +51,8 @@ public class HomeService {
             homeRes.setHotKeywords(hotKeywords); homeRes.setRecommendKeywords(recommendKeywords);
             homeRes.setTopKeywords(this.orderByCount(hashtagCourseRepository.findAll()));
 
-            Optional<List<SearchCourseRes>> hotKeywordSearchCourseResList = this.getCoursesByFixedKeywords(hotKeywords);
-            Optional<List<SearchCourseRes>> recommendKeywordSearchCourseResList = this.getCoursesByFixedKeywords(recommendKeywords);
+            Optional<List<SearchCourseRes>> hotKeywordSearchCourseResList = this.getCoursesByFixedKeywords(hotKeywords, userIdx);
+            Optional<List<SearchCourseRes>> recommendKeywordSearchCourseResList = this.getCoursesByFixedKeywords(recommendKeywords, userIdx);
             if(hotKeywordSearchCourseResList.isPresent() &&
                     recommendKeywordSearchCourseResList.isPresent()){
                 if(hotKeywordSearchCourseResList.get().size() == 0  ||
@@ -63,7 +70,8 @@ public class HomeService {
     }
 
     // 고정된 키워드에 해당하는 코스 조회
-    public Optional<List<SearchCourseRes>> getCoursesByFixedKeywords(final List<String> keywords) {
+    public Optional<List<SearchCourseRes>> getCoursesByFixedKeywords(final List<String> keywords,
+                                                                     final int userIdx) {
         List<SearchCourseRes> searchCourseResList = new ArrayList<>();
         for (int i = 0; i < keywords.size(); i++) {
             Optional<Hashtag> hashtag = hashtagRepository.findByTagInfo(keywords.get(i));
@@ -74,16 +82,18 @@ public class HomeService {
                 for (int j = 0; j < hashtagCourses.size(); j++) {
                     courseIdxList.add(hashtagCourses.get(j).getCourseIdx());
                 }
-                List<CourseSearchResult> courses = new ArrayList<>();
+                List<CourseSearchResult> courseSearchResultList = new ArrayList<>();
                 for (int k = 0; k < courseIdxList.size(); k++) {
-                    CourseSearchResult courseSearchResult = new CourseSearchResult();
                     Course course = courseRepository.findBy_id(courseIdxList.get(k));
+                    CourseSearchResult courseSearchResult = new CourseSearchResult();
                     courseSearchResult.setCourse(course);
-                    courseSearchResult.setLikeCount(likeCourseRepository.countByCourseIdx(course.get_id()));
-                    courses.add(courseSearchResult);
+                    courseSearchResult.setLikeCount(likeService.getCourseLikeCount(course.get_id()));
+                    courseSearchResult.setLiked(likeService.isLikedCourse(course.get_id(), userIdx));
+                    courseSearchResult.setScraped(true);
+                    courseSearchResultList.add(courseSearchResult);
                 }
-                Collections.sort(courses);
-                SearchCourseRes searchCourseRes = new SearchCourseRes(courses);
+                Collections.sort(courseSearchResultList);
+                SearchCourseRes searchCourseRes = new SearchCourseRes(courseSearchResultList);
                 searchCourseResList.add(searchCourseRes);
             }
         }

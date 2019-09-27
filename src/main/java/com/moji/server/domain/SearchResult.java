@@ -5,11 +5,19 @@ import lombok.Data;
 public class SearchResult {
     @Data
     static public class CourseSearchResult implements Comparable<CourseSearchResult> {
-        private Course course;
+        Course course;
+
+        // did like
+        private boolean isLiked;
+
+        // did scrap
+        private boolean isScraped;
+
+        // like count
         private int likeCount;
 
-        // 댓글 기능 구현 후 추가
-        private int commentCount;
+        // scrap count
+        private int scrapCount;
 
         @Override
         public int compareTo(CourseSearchResult courseSearchResult) {
