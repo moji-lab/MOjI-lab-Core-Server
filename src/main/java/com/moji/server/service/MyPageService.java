@@ -1,10 +1,12 @@
 package com.moji.server.service;
 
+import com.moji.server.domain.Board;
 import com.moji.server.domain.Course;
 import com.moji.server.domain.Scrap;
 import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.MyPageRes;
+import com.moji.server.repository.BoardRepository;
 import com.moji.server.repository.CourseRepository;
 import com.moji.server.repository.ScrapRepository;
 import com.moji.server.repository.UserRepository;
@@ -25,14 +27,14 @@ import java.util.Optional;
 public class MyPageService {
 
     private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
+    private final BoardRepository boardRepository;
     private final ScrapRepository scrapRepository;
 
     public MyPageService(final UserRepository userRepository,
-                         final CourseRepository courseRepository,
+                         final BoardRepository boardRepository,
                          final ScrapRepository scrapRepository) {
         this.userRepository = userRepository;
-        this.courseRepository = courseRepository;
+        this.boardRepository = boardRepository;
         this.scrapRepository = scrapRepository;
     }
 
@@ -45,50 +47,52 @@ public class MyPageService {
 
     public DefaultRes getMyCourseList(final int userIdx) {
         defaultInfo defaultInfo = getMyPageDefaultInfo(userIdx);
-        MyPageRes<Course> myPageRes = new MyPageRes<>();
+        MyPageRes<Board> myPageRes = new MyPageRes<>();
         myPageRes.setNickname(defaultInfo.nickname);
         myPageRes.setProfileUrl(defaultInfo.profileUrl);
-        myPageRes.setCourseCount(defaultInfo.courseList.size());
+        myPageRes.setCourseCount(defaultInfo.boardList.size());
         myPageRes.setScrapCount(defaultInfo.scrapList.size());
-        myPageRes.setFeedList(defaultInfo.courseList);
+        myPageRes.setFeedList(defaultInfo.boardList);
         return DefaultRes.res(StatusCode.OK, "조회 성공", myPageRes);
     }
 
     public DefaultRes getMyScrapCourseList(final int userIdx) {
         defaultInfo defaultInfo = getMyPageDefaultInfo(userIdx);
-        MyPageRes<Course> myPageRes = new MyPageRes<>();
+        MyPageRes<Board> myPageRes = new MyPageRes<>();
         myPageRes.setNickname(defaultInfo.nickname);
         myPageRes.setProfileUrl(defaultInfo.profileUrl);
-        myPageRes.setCourseCount(defaultInfo.courseList.size());
+        myPageRes.setCourseCount(defaultInfo.boardList.size());
         myPageRes.setScrapCount(defaultInfo.scrapList.size());
 
-        List<Course> courseList = new LinkedList<>();
+        List<Board> courseList = new LinkedList<>();
 
         for (Scrap s : defaultInfo.scrapList) {
-            courseList.add(courseRepository.findBy_id(s.getBoardIdx()));
+            log.info(s.toString());
+            courseList.add(boardRepository.findBy_id(s.getBoardIdx()));
         }
+        myPageRes.setFeedList(courseList);
 
-        return DefaultRes.res(StatusCode.OK, "조회 성공", courseList);
+        return DefaultRes.res(StatusCode.OK, "조회 성공", myPageRes);
     }
 
     //기본으로 프로필 사진, 닉네임, 나의 기록(친구와 공유), 스크랩 한 글 갯수 포함
     private defaultInfo getMyPageDefaultInfo(final int userIdx) {
         Optional<User> user = userRepository.findByUserIdx(userIdx);
         List<Scrap> scrapList = scrapRepository.findByUserIdx(userIdx);
-        List<Course> courseList = courseRepository.findByUserIdx(userIdx);
-        return new defaultInfo(user.get().getPhotoUrl(), user.get().getNickname(), courseList, scrapList);
+        List<Board> boardList = boardRepository.findByUserIdx(userIdx);
+        return new defaultInfo(user.get().getPhotoUrl(), user.get().getNickname(), boardList, scrapList);
     }
 
     private static class defaultInfo {
         private String profileUrl;
         private String nickname;
-        private List<Course> courseList;
+        private List<Board> boardList;
         private List<Scrap> scrapList;
 
-        defaultInfo(final String profileUrl, final String nickname, final List<Course> courseList, final List<Scrap> scrapList) {
+        defaultInfo(final String profileUrl, final String nickname, final List<Board> courseList, final List<Scrap> scrapList) {
             this.profileUrl = profileUrl;
             this.nickname = nickname;
-            this.courseList = courseList;
+            this.boardList = courseList;
             this.scrapList = scrapList;
         }
     }
