@@ -11,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -114,7 +117,7 @@ public class BoardService {
         }
     }
 
-    public DefaultRes getRecentFeed(int userIdx) {
+    public DefaultRes getRecentFeed(final int userIdx) {
         return getDefault(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
     }
 
@@ -163,16 +166,16 @@ public class BoardService {
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public DefaultRes<BoardRes> getBoardInfo(String boardIdx, int userIdx) {
+    public DefaultRes<BoardRes> getBoardInfo(final String boardIdx, final int userIdx) {
         try {
-            BoardRes boardRes = new BoardRes();
-            Optional<User> user = userRepository.findByUserIdx(userIdx);
-            Board board = boardRepository.findBy_id(boardIdx);
+            final BoardRes boardRes = new BoardRes();
+            final Optional<User> user = userRepository.findByUserIdx(userIdx);
+            final Board board = boardRepository.findBy_id(boardIdx);
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
@@ -184,7 +187,7 @@ public class BoardService {
             boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
     }

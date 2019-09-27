@@ -33,7 +33,6 @@ public class LikeController {
             likeReq.setUserIdx((int)httpServletRequest.getAttribute("userIdx"));
             return new ResponseEntity<>(likeService.checkBoardLike(likeReq), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -48,7 +47,6 @@ public class LikeController {
             likeReq.setUserIdx((int)httpServletRequest.getAttribute("userIdx"));
             return new ResponseEntity<>(likeService.checkCourseLike(likeReq), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
