@@ -36,5 +36,4 @@ public class Board {
 
     // 댓글
     private List<Comment> comments = new ArrayList<Comment>();
-
 }
