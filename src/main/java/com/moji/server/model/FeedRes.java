@@ -18,4 +18,5 @@ public class FeedRes {
     private int likeCount;
     private int commentCount;
     private String mainAddress;
+    private boolean isScraped;
 }

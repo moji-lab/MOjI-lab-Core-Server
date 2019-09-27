@@ -56,4 +56,9 @@ public class ScrapService {
             return DB_ERROR;
         }
     }
+
+    public boolean isScraped(final int userIdx, final String boardIdx) {
+        Optional<Scrap> scrap = scrapRepository.findByUserIdxAndBoardIdx(userIdx, boardIdx);
+        return scrap.isPresent();
+    }
 }

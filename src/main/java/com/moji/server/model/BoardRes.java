@@ -1,6 +1,5 @@
 package com.moji.server.model;
 
-import com.moji.server.domain.Course;
 import com.moji.server.domain.User;
 import lombok.Data;
 
@@ -15,6 +14,8 @@ public class BoardRes {
     // user writeTime
     private Date writeTime;
 
-    private int like;
+    private int likeCount;
     List<CourseRes> courseList;
+    private boolean isScraped;
+    private boolean isLiked;
 }

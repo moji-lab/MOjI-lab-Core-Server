@@ -25,18 +25,21 @@ public class BoardService {
     private final CourseController courseController;
     private final CourseService courseService;
     private final LikeService likeService;
+    private final ScrapService scrapService;
 
     //생성자 의존성 주입
     public BoardService(final BoardRepository boardRepository,
                         final CourseController courseController,
                         final CourseService courseService,
                         final LikeService likeService,
-                        final UserRepository userRepository) {
+                        final UserRepository userRepository,
+                        final ScrapService scrapService) {
         this.boardRepository = boardRepository;
         this.courseController = courseController;
         this.courseService = courseService;
         this.likeService = likeService;
         this.userRepository = userRepository;
+        this.scrapService = scrapService;
     }
 
     //게시물 작성
@@ -162,6 +165,7 @@ public class BoardService {
                 feedRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
                 feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
                 feedRes.setMainAddress(board.getMainAddress());
+                feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
@@ -185,6 +189,9 @@ public class BoardService {
             boardRes.set_id(boardIdx);
             boardRes.setWriteTime(board.getWriteTime());
             boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
+            boardRes.setScraped(scrapService.isScraped(userIdx, boardIdx));
+            boardRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+            boardRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
             log.error(e.getMessage());
