@@ -2,16 +2,12 @@ package com.moji.server.service;
 
 import com.moji.server.api.CourseController;
 import com.moji.server.domain.*;
-import com.moji.server.model.BoardReq;
-import com.moji.server.model.BoardRes;
-import com.moji.server.model.DefaultRes;
-import com.moji.server.model.FeedRes;
+import com.moji.server.model.*;
 import com.moji.server.repository.BoardRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -45,10 +41,11 @@ public class BoardService {
 
     //게시물 작성
     @Transactional
-    public DefaultRes saveBoard(final BoardReq board) {
+    public DefaultRes saveBoard(final BoardReq board, int userIdx) {
         try {
 
             board.getInfo().setWriteTime(new Date());
+            board.getInfo().setUserIdx(userIdx);
             boardRepository.save(board.getInfo());
             courseController.saveCourse(board);
 
@@ -66,7 +63,7 @@ public class BoardService {
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
         } catch (Exception e) {
             log.info(e.getMessage());
-            return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
+            return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.FAIL_CREATE_BOARD);
         }
     }
 
@@ -91,14 +88,30 @@ public class BoardService {
         return boardRepository.findBy_id(postIdx) != null;
     }
 
-    //게시물 공유
-    public DefaultRes shareBoard(final String person) {
+    //게시물 공유 사람 조회
+    public DefaultRes getSharePerson(final String person) {
         try {
             Optional<User> email = userRepository.findByEmail(person);
             Optional<User> nickname = userRepository.findByNickname(person);
+            Optional<PersonRes> personRes = Optional.of(new PersonRes());
+
+
             if (!email.isPresent() && !nickname.isPresent()) return DefaultRes.res(StatusCode.NOT_FOUND, "해당 사용자 없음");
-            else if (email.isPresent()) return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", email);
-            else return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", nickname);
+            else if (email.isPresent()) {
+                personRes.get().setEmail(email.get().getEmail());
+                personRes.get().setNickname(email.get().getNickname());
+                personRes.get().setUserIdx(email.get().getUserIdx());
+                personRes.get().setPhotoUrl(email.get().getPhotoUrl());
+            }
+            else
+            {
+                personRes.get().setEmail(nickname.get().getEmail());
+                personRes.get().setNickname(nickname.get().getNickname());
+                personRes.get().setUserIdx(nickname.get().getUserIdx());
+                personRes.get().setPhotoUrl(nickname.get().getPhotoUrl());
+            }
+
+            return DefaultRes.res(StatusCode.OK, "사용자 조회 완료", personRes);
 
         } catch (Exception e) {
             log.info(e.getMessage());
@@ -114,8 +127,9 @@ public class BoardService {
             List<FeedRes> feedResList = new ArrayList<>();
             for (int i = 0; i < boardList.size(); i++) {
                 Board board = boardList.get(i);
-                User user = userRepository.findByUserIdx(board.getUserIdx());
-                if (user == null) {
+                Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
+
+                if(!user.isPresent()) {
                     continue;
                 }
 
@@ -131,8 +145,8 @@ public class BoardService {
                 }
 
                 FeedRes feedRes = new FeedRes();
-                feedRes.setNickName(user.getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
-                feedRes.setProfileUrl(user.getPhotoUrl());
+                feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
+                feedRes.setProfileUrl(user.get().getPhotoUrl());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
                 feedRes.setPhotoList(photoList);
@@ -152,14 +166,14 @@ public class BoardService {
     public DefaultRes<BoardRes> getBoardInfo(String boardIdx, int userIdx) {
         try {
             BoardRes boardRes = new BoardRes();
-            User user = userRepository.findByUserIdx(userIdx);
+            Optional<User> user = userRepository.findByUserIdx(userIdx);
             Board board = boardRepository.findBy_id(boardIdx);
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
             }
 
-            boardRes.setUser(user);
+            boardRes.setUser(user.get());
             boardRes.set_id(boardIdx);
             boardRes.setWriteTime(board.getWriteTime());
             boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));

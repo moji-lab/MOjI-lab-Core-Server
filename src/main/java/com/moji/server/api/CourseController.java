@@ -29,7 +29,7 @@ public class CourseController {
 
         } catch (Exception e) {
             log.info(e.getMessage());
-            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
