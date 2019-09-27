@@ -158,6 +158,7 @@ public class BoardService {
                 feedRes.setCommentCount(board.getComments().size());
                 feedRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
                 feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+                feedRes.setMainAddress(board.getMainAddress());
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
