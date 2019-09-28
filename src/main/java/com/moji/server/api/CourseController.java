@@ -21,7 +21,6 @@ public class CourseController {
     }
 
     //코스 등록
-    @PostMapping("course")
     public ResponseEntity<DefaultRes> saveCourse(@RequestBody final BoardReq board) {
         try {
 
@@ -33,4 +32,15 @@ public class CourseController {
         }
     }
 
+    //코스 공유
+    public ResponseEntity<DefaultRes> shareCourse(@RequestBody final BoardReq board) {
+        try {
+
+            return new ResponseEntity<>(courseService.shareCourse(board), HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

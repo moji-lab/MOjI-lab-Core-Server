@@ -7,10 +7,7 @@ import com.moji.server.util.auth.Auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -65,8 +62,8 @@ public class BoardController {
     }
 
     //게시물 공유 사람 조회
-    @GetMapping("shares/{person}")
-    public ResponseEntity<DefaultRes> getSharePerson(@PathVariable(value = "person") final String person) {
+    @GetMapping("shares")
+    public ResponseEntity<DefaultRes> getSharePerson(@RequestParam(value = "person", required = false) final String person) {
         try {
             return new ResponseEntity<>(boardService.getSharePerson(person), HttpStatus.OK);
         } catch (Exception e) {

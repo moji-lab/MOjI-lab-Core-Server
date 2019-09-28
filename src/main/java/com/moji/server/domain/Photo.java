@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 @Data
-public class Photo {
+public class Photo implements Cloneable{
 
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,4 +18,9 @@ public class Photo {
     private boolean represent;
 //    private String courseIdx;
 
+
+    @Override
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
+    }
 }

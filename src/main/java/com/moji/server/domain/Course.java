@@ -1,6 +1,7 @@
 package com.moji.server.domain;
 
 import lombok.Data;
+import org.apache.http.client.utils.CloneUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Data
 @Document(collection = "course")
-public class Course {
+public class Course implements Cloneable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,4 +46,22 @@ public class Course {
 
     //댓글
     private List<Comment> comments = new ArrayList<Comment>();
+
+
+    @Override
+    public Object clone() throws CloneNotSupportedException{
+        Course course = (Course)super.clone();
+        course.tagInfo = (List<String>) CloneUtils.clone(course.tagInfo);
+
+        List<Photo> tmpt = new ArrayList<>();
+
+        for(int i = 0; i < course.photos.size(); i++)
+        {
+            tmpt.add((Photo)CloneUtils.clone(course.photos.get(i)));
+        }
+
+        course.photos = tmpt;
+//        course.photos = (List<Photo>) CloneUtils.clone(course.photos);
+        return course;
+    }
 }
