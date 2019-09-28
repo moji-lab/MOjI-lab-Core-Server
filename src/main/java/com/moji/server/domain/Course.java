@@ -29,7 +29,9 @@ public class Course {
     private String content;
     private int order;
     private List<String> tagInfo = new ArrayList<String>();
+    //위도
     private String lat;
+    //경도
     private String lng;
 
     @Field
