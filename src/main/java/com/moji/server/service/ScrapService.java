@@ -13,7 +13,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import java.util.Optional;
 
 import static com.moji.server.model.DefaultRes.DB_ERROR;
-import static com.moji.server.model.DefaultRes.NOT_FOUNT;
+import static com.moji.server.model.DefaultRes.NOT_FOUND;
 
 /**
  * Created By ds on 25/09/2019.
@@ -49,7 +49,7 @@ public class ScrapService {
                 scrapRepository.deleteById(scrap.get().getScrapIdx());
                 return DefaultRes.res(StatusCode.NO_CONTENT, "스크랩 삭제 성공");
             }
-            return NOT_FOUNT;
+            return NOT_FOUND;
         } catch (Exception e) {
             log.error(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

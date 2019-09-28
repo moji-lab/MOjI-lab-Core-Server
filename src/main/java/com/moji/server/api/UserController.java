@@ -72,7 +72,7 @@ public class UserController {
     @GetMapping("/users")
     public ResponseEntity<DefaultRes> getUser(final HttpServletRequest httpServletRequest) {
         try {
-            int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(userService.findByUserIdx(userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());

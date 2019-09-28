@@ -135,8 +135,7 @@ public class BoardService {
     private DefaultRes getDefault(final int userIdx, final List<Board> boardList) {
         try {
             List<FeedRes> feedResList = new ArrayList<>();
-            for (int i = 0; i < boardList.size(); i++) {
-                Board board = boardList.get(i);
+            for (Board board : boardList) {
                 Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
 
                 if (!user.isPresent()) {
@@ -144,14 +143,15 @@ public class BoardService {
                 }
 
                 List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
-                log.info(courseList.toString());
                 if (courseList.size() == 0) { // 코스 정보가 없을 경우?
                     continue;
                 }
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
-                    photoList.add(courseList.get(j).getPhotos().get(0));
+                    if(courseList.get(j).getPhotos().get(0) != null) {
+                        photoList.add(courseList.get(j).getPhotos().get(0));
+                    }
                 }
 
                 FeedRes feedRes = new FeedRes();
@@ -159,6 +159,7 @@ public class BoardService {
                 feedRes.setProfileUrl(user.get().getPhotoUrl());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
+                feedRes.setComments(board.getComments());
                 feedRes.setPhotoList(photoList);
                 feedRes.setDate(board.getWriteTime());
                 feedRes.setCommentCount(board.getComments().size());
@@ -170,6 +171,7 @@ public class BoardService {
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
