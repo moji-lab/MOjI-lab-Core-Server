@@ -93,4 +93,15 @@ public class UserController {
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/users/{userIdx}")
+    public ResponseEntity getUserInfo(final HttpServletRequest httpServletRequest,
+                                      @PathVariable final int userIdx) {
+        try {
+            return new ResponseEntity<>(userService.findByUserIdx(userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
