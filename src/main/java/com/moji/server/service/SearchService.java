@@ -26,7 +26,6 @@ public class SearchService {
     private final CourseRepository courseRepository;
     private final AddressRepository addressRepository;
     private final BoardRepository boardRepository;
-    private final LikeBoardRepository likeBoardRepository;
     private final LikeCourseRepository likeCourseRepository;
     private final CourseService courseService;
     private final LikeService likeService;
@@ -48,7 +47,6 @@ public class SearchService {
         this.courseRepository = courseRepository;
         this.addressRepository = addressRepository;
         this.boardRepository = boardRepository;
-        this.likeBoardRepository = likeBoardRepository;
         this.likeCourseRepository = likeCourseRepository;
         this.courseService = courseService;
         this.likeService = likeService;
@@ -66,18 +64,14 @@ public class SearchService {
                         hashtagCourseRepository.findAllBytagIdx(hashtags.get().get(i).get_id()).get();
                 for(int j = 0; j<hashtagCourses.size(); j++){
                     String courseIdx = hashtagCourses.get(j).getCourseIdx();
-                    Course course;
+                    Course course = courseRepository.findBy_id(courseIdx);
 
                     // 날짜 필터 적용시
                     if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
-                        course = courseRepository.findBy_idAndVisitTimeBetween(courseIdx,
-                                searchReq.getStartDate(),
-                                searchReq.getEndDate());
+                        if(course.getVisitTime().isBefore(searchReq.getStartDate()) ||
+                        course.getVisitTime().isAfter(searchReq.getEndDate())) continue;
                     }
-                    // 날짜 필터 미적용시
-                    else{
-                        course = courseRepository.findBy_id(courseIdx);
-                    }
+
                     CourseSearchResult courseSearchResult = new CourseSearchResult();
                     courseSearchResult.setCourse(course);
                     courseSearchResult.setLikeCount(likeCourseRepository.countByCourseIdx(course.get_id()));
@@ -103,10 +97,14 @@ public class SearchService {
             Optional<SearchBoardRes> searchBoardRes  = this.getSearchBoardRes(searchReq, userIdx);
             Optional<SearchCourseRes> searchCourseRes = this.getSearchCourseRes(searchReq, userIdx);
             SearchPlaceRes searchPlaceRes = new SearchPlaceRes(searchBoardRes.get(), searchCourseRes.get());
+
+            if(searchBoardRes.get().getBoards() == null && searchCourseRes.get().getCourses().size() == 0){
+                return DefaultRes.res(StatusCode.NOT_FOUND, "검색된 데이터가 없습니다.");
+            }
             return DefaultRes.res(StatusCode.OK, "검색 성공", searchPlaceRes);
         }
         catch(Exception e){
-            return DefaultRes.res(StatusCode.NOT_FOUND, "검색 실패");
+            return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
         }
     }
 
@@ -117,15 +115,12 @@ public class SearchService {
             List<BoardSearchResult> boards = new ArrayList<>();
             for (int i = 0; i < addresses.get().size(); i++) {
                 String boardIdx = addresses.get().get(i).getBoardIdx();
-                Board board;
-                if (searchReq.getStartDate() != null && searchReq.getEndDate() != null) {
-                    board = boardRepository.findBy_idAndWriteTimeBetween(boardIdx,
-                            searchReq.getStartDate(),
-                            searchReq.getEndDate());
-                } else {
-                    board = boardRepository.findBy_id(boardIdx);
+                Board board = boardRepository.findBy_id(boardIdx);
+                // 날짜 필터 적용시
+                if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
+                    if(board.getWriteTime().isBefore(searchReq.getStartDate()) ||
+                            board.getWriteTime().isAfter(searchReq.getEndDate())) continue;
                 }
-
                 Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
 
                 if (!user.isPresent()) continue;
@@ -174,18 +169,14 @@ public class SearchService {
                 else temp = coursesBySubAddress;
                 for (int i = 0; i < temp.get().size(); i++) {
                     String courseIdx = temp.get().get(i).get_id();
-                    Course course;
+                    Course course = courseRepository.findBy_id(courseIdx);
 
                     // 날짜 필터 적용시
-                    if (searchReq.getStartDate() != null && searchReq.getEndDate() != null) {
-                        course = courseRepository.findBy_idAndVisitTimeBetween(courseIdx,
-                                searchReq.getStartDate(),
-                                searchReq.getEndDate());
+                    if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
+                        if(course.getVisitTime().isBefore(searchReq.getStartDate()) ||
+                                course.getVisitTime().isAfter(searchReq.getEndDate())) continue;
                     }
-                    // 날짜 필터 미적용시
-                    else {
-                        course = courseRepository.findBy_id(courseIdx);
-                    }
+
                     CourseSearchResult courseSearchResult = new CourseSearchResult();
                     courseSearchResult.setCourse(course);
                     courseSearchResult.setLikeCount(likeCourseRepository.countByCourseIdx(course.get_id()));

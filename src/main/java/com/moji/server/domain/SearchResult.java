@@ -2,6 +2,7 @@ package com.moji.server.domain;
 
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class SearchResult {
     static public class BoardSearchResult implements Comparable<BoardSearchResult>{
         private String nickName;
         private String profileUrl;
-        private Date date;
+        private LocalDate date;
         private String boardIdx;
         private List<Photo> photoList;
         private String place;
