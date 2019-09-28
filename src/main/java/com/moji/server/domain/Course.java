@@ -1,6 +1,5 @@
 package com.moji.server.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.apache.http.client.utils.CloneUtils;
 import org.springframework.data.annotation.Id;
@@ -11,7 +10,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +30,9 @@ public class Course implements Cloneable{
     private String content;
     private int order;
     private List<String> tagInfo = new ArrayList<String>();
+    //위도
     private String lat;
+    //경도
     private String lng;
 
     @Field

@@ -1,6 +1,7 @@
 package com.moji.server.repository;
 
 import com.moji.server.domain.Board;
+import com.moji.server.domain.Course;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public interface BoardRepository extends MongoRepository<Board, String> {
     Board findBy_id(String boardIdx);
-    Board findBy_idAndWriteTimeBetween(String boardIdx, LocalDateTime startDate, LocalDateTime endDate);
-
+    Board findBy_idAndWriteTimeBetween(String boardIdx, LocalDate startDate, LocalDate endDate);
     List<Board> findByOpenOrderByWriteTimeDesc(boolean open);
+    List<Board> findByUserIdx(final int userIdx);
 }

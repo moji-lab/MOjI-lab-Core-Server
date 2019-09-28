@@ -25,18 +25,21 @@ public class BoardService {
     private final CourseController courseController;
     private final CourseService courseService;
     private final LikeService likeService;
+    private final ScrapService scrapService;
 
     //생성자 의존성 주입
     public BoardService(final BoardRepository boardRepository,
                         final CourseController courseController,
                         final CourseService courseService,
                         final LikeService likeService,
-                        final UserRepository userRepository) {
+                        final UserRepository userRepository,
+                        final ScrapService scrapService) {
         this.boardRepository = boardRepository;
         this.courseController = courseController;
         this.courseService = courseService;
         this.likeService = likeService;
         this.userRepository = userRepository;
+        this.scrapService = scrapService;
     }
 
     //게시물 작성
@@ -119,9 +122,7 @@ public class BoardService {
                 personRes.get().setNickname(email.get().getNickname());
                 personRes.get().setUserIdx(email.get().getUserIdx());
                 personRes.get().setPhotoUrl(email.get().getPhotoUrl());
-            }
-            else
-            {
+            } else {
                 personRes.get().setEmail(nickname.get().getEmail());
                 personRes.get().setNickname(nickname.get().getNickname());
                 personRes.get().setUserIdx(nickname.get().getUserIdx());
@@ -136,66 +137,83 @@ public class BoardService {
         }
     }
 
-    public DefaultRes getRecentFeed(int userIdx) {
-        try {
-            // TODO: 공개 대상인지 판단하여 공개 설정
-            List<Board> boardList = boardRepository.findByOpenOrderByWriteTimeDesc(true); // TODO: 값 조정될 필요성
+    public DefaultRes getRecentFeed(final int userIdx) {
+        return getDefault(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
+    }
 
+    public DefaultRes getBoardList(final int userIdx) {
+        return getDefault(userIdx, boardRepository.findByUserIdx(userIdx));
+    }
+
+    public DefaultRes getScrapList(final int userIdx, final List<Board> list) {
+        return getDefault(userIdx, list);
+    }
+
+    private DefaultRes getDefault(final int userIdx, final List<Board> boardList) {
+        try {
             List<FeedRes> feedResList = new ArrayList<>();
-            for (int i = 0; i < boardList.size(); i++) {
-                Board board = boardList.get(i);
-                User user = userRepository.findByUserIdx(board.getUserIdx());
-                if (user == null) {
+            for (Board board : boardList) {
+                Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
+
+                if (!user.isPresent()) {
                     continue;
                 }
 
                 List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
-                log.info(courseList.toString());
                 if (courseList.size() == 0) { // 코스 정보가 없을 경우?
                     continue;
                 }
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
-                    photoList.add(courseList.get(j).getPhotos().get(0));
+                    if(courseList.get(j).getPhotos().get(0) != null) {
+                        photoList.add(courseList.get(j).getPhotos().get(0));
+                    }
                 }
 
                 FeedRes feedRes = new FeedRes();
-                feedRes.setNickName(user.getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
-                feedRes.setProfileUrl(user.getPhotoUrl());
+                feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
+                feedRes.setProfileUrl(user.get().getPhotoUrl());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
+                feedRes.setComments(board.getComments());
                 feedRes.setPhotoList(photoList);
                 feedRes.setDate(board.getWriteTime());
                 feedRes.setCommentCount(board.getComments().size());
                 feedRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
                 feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+                feedRes.setMainAddress(board.getMainAddress());
+                feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
         } catch (Exception e) {
             e.printStackTrace();
+            log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public DefaultRes<BoardRes> getBoardInfo(String boardIdx, int userIdx) {
+    public DefaultRes<BoardRes> getBoardInfo(final String boardIdx, final int userIdx) {
         try {
-            BoardRes boardRes = new BoardRes();
-            User user = userRepository.findByUserIdx(userIdx);
-            Board board = boardRepository.findBy_id(boardIdx);
+            final BoardRes boardRes = new BoardRes();
+            final Optional<User> user = userRepository.findByUserIdx(userIdx);
+            final Board board = boardRepository.findBy_id(boardIdx);
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
             }
 
-            boardRes.setUser(user);
+            boardRes.setUser(user.get());
             boardRes.set_id(boardIdx);
             boardRes.setWriteTime(board.getWriteTime());
             boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
+            boardRes.setScraped(scrapService.isScraped(userIdx, boardIdx));
+            boardRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+            boardRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
     }

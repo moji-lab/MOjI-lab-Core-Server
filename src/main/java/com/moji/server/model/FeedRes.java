@@ -1,7 +1,10 @@
 package com.moji.server.model;
 
+import com.moji.server.domain.Comment;
 import com.moji.server.domain.Photo;
 import lombok.Data;
+
+import java.util.ArrayList;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -18,4 +21,7 @@ public class FeedRes {
     private boolean isLiked;
     private int likeCount;
     private int commentCount;
+    private String mainAddress;
+    private boolean isScraped;
+    private List<Comment> comments = new ArrayList<Comment>();
 }

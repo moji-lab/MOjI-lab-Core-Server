@@ -95,6 +95,13 @@
             <artifactId>spring-cloud-aws-autoconfigure</artifactId>
             <version>1.2.1.RELEASE</version>
         </dependency>
+
+        <!-- JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180813</version>
+        </dependency>
     </dependencies>
 
     <build>

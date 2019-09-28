@@ -1,5 +1,6 @@
 package com.moji.server.api;
 
+import com.moji.server.domain.Alarm;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.service.AlarmService;
 import com.moji.server.service.AuthService;
@@ -8,9 +9,7 @@ import com.moji.server.util.auth.Auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -32,6 +31,19 @@ public class AlarmController {
         try {
             int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(alarmService.getAlarms(userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Auth
+    @PostMapping("/alarms")
+    public ResponseEntity<DefaultRes> saveUserAlarm(HttpServletRequest httpServletRequest,
+                                                    @RequestBody Alarm alarm) {
+        try {
+            int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(alarmService.saveAlarm(userIdx, alarm), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,75 +1,84 @@
 package com.moji.server.service;
 
 import com.moji.server.domain.*;
-import com.moji.server.domain.SearchResult.BoardSearchResult;
+import com.moji.server.domain.SearchResult.CourseSearchResult;
+import com.moji.server.model.CourseRes;
 import com.moji.server.model.DefaultRes;
-import com.moji.server.model.SearchRes.SearchBoardRes;
+import com.moji.server.model.HomeRes;
+import com.moji.server.model.SearchRes;
+import com.moji.server.model.SearchRes.SearchCourseRes;
 import com.moji.server.repository.*;
 import com.moji.server.util.StatusCode;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class HomeService {
-    private final CourseService courseService;
-    private final BoardRepository boardRepository;
+    private final CourseRepository courseRepository;
     private final HashtagRepository hashtagRepository;
     private final HashtagCourseRepository hashtagCourseRepository;
     private final UserRepository userRepository;
-    private final LikeBoardRepository likeBoardRepository;
+    private final LikeCourseRepository likeCourseRepository;
+    private final CourseService courseService;
+    private final LikeService likeService;
 
-    public HomeService(final CourseService courseService,
-                       final BoardRepository boardRepository,
+    public HomeService(final CourseRepository courseRepository,
                        final HashtagRepository hashtagRepository,
                        final HashtagCourseRepository hashtagCourseRepository,
                        final UserRepository userRepository,
-                       final LikeBoardRepository likeBoardRepository){
-        this.courseService = courseService;
-        this.boardRepository = boardRepository;
+                       final LikeCourseRepository likeCourseRepository,
+                       final CourseService courseService,
+                       final LikeService likeService) {
+        this.courseRepository = courseRepository;
         this.hashtagRepository = hashtagRepository;
         this.hashtagCourseRepository = hashtagCourseRepository;
         this.userRepository = userRepository;
-        this.likeBoardRepository = likeBoardRepository;
+        this.likeCourseRepository = likeCourseRepository;
+        this.courseService = courseService;
+        this.likeService = likeService;
     }
 
-    // 고정된 키워드에 해당하는 기록하기 조회
-    public DefaultRes getBoardsByFixedKeywords(final List<String> keywords) {
-        for (int i = 0; i < keywords.size(); i++) {
-            Optional<Hashtag> hashtag = hashtagRepository.findByTagInfo(keywords.get(i));
-            if (hashtag.isPresent()) {
-                List<String> courseIdxList = new ArrayList<>();
-                List<HashtagCourse> hashtagCourses =
-                        hashtagCourseRepository.findAllBytagIdx(hashtag.get().get_id()).get();
-                for (int j = 0; j < hashtagCourses.size(); j++) {
-                    courseIdxList.add(hashtagCourses.get(j).getCourseIdx());
-                }
-                List<String> boardIdxList = new ArrayList<>();
-                for (String courseIdx : courseIdxList) {
-                    boardIdxList.add(courseService.getCourse(courseIdx).getBoardIdx());
-                }
-                List<BoardSearchResult> boards = new ArrayList<>();
-                for (int k = 0; k < boardIdxList.size(); k++) {
-                    BoardSearchResult boardSearchResult = new BoardSearchResult();
-                    Board board = boardRepository.findBy_id(boardIdxList.get(k));
-                    boardSearchResult.setBoard(board);
-                    boardSearchResult.setWriter(userRepository.findByUserIdx(board.getUserIdx()));
-                    boardSearchResult.setLikeCount(likeBoardRepository.countByBoardIdx(board.get_id()));
-                    boards.add(boardSearchResult);
-                }
-                if (boards.size() == 0) return DefaultRes.res(StatusCode.NOT_FOUND, "해당 키워드의 기록하기가 없습니다.");
-                else {
-                    Collections.sort(boards);
-                    SearchBoardRes searchBoardRes = new SearchBoardRes(boards);
-                    return DefaultRes.res(StatusCode.OK, "조회 성공", searchBoardRes);
-                }
-            } else {
-                return DefaultRes.res(StatusCode.NOT_FOUND, "조회 실패");
-            }
+    // 홈 화면 데이터 조회
+    public DefaultRes getHomeData(final int userIdx,
+                                  final String hotCategoryKeyword,
+                                  final List<String> hotKeywords,
+                                  final List<String> recommendKeywords){
+        try{
+            HomeRes homeRes = new HomeRes();
+            homeRes.setNickName(userRepository.findByUserIdx(userIdx).get().getNickname());
+            homeRes.setHotCategoryKeyword(hotCategoryKeyword);
+            homeRes.setHotKeywords(hotKeywords); homeRes.setRecommendKeywords(recommendKeywords);
+            homeRes.setTopKeywords(this.orderByCount(hashtagCourseRepository.findAll()));
+            return DefaultRes.res(StatusCode.OK, "홈 조회 성공", homeRes);
         }
-        return DefaultRes.res(StatusCode.NOT_FOUND, "조회 실패");
+        catch(Exception e){
+            return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
+        }
+    }
+
+
+    public List<String> orderByCount(List<HashtagCourse> hashtagCourses){
+        final Map<String, Integer> counter = new HashMap<String, Integer>();
+        for (HashtagCourse hashtagCourse : hashtagCourses)
+            counter.put(hashtagCourse.getTagIdx(), 1 +
+                    (counter.containsKey(hashtagCourse.getTagIdx()) ? counter.get(hashtagCourse.getTagIdx()) : 0));
+        List<String> list = new ArrayList<>(counter.keySet());
+        Collections.sort(list, new Comparator<String>() {
+            @Override
+            public int compare(String x, String y) {
+                return counter.get(y) - counter.get(x);
+            }
+        });
+        list = list.subList(0,5);
+        List<String> tagInfoList = new ArrayList<>();
+        for (String tagIdx : list) {
+            tagInfoList.add(hashtagRepository.findById(tagIdx).get().getTagInfo());
+        }
+        return tagInfoList;
     }
 }
+
+
+
+

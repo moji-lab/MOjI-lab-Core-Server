@@ -30,21 +30,23 @@ public class HashtagService {
     // 해시태그 저장
     public DefaultRes saveHashtags(final HashtagReq hashtagReq){
         try{
-            List<HashtagCourse> hashtagCourses = new ArrayList<>();
             for(int i = 0; i<hashtagReq.getHashtags().size(); i++){
                 Hashtag hashtag = hashtagReq.getHashtags().get(i);
 
                 Optional<Hashtag> selectedHashtag = hashtagRepository.findByTagInfo(hashtag.getTagInfo());
-                String courseIdx = hashtagReq.getCourseIdx(); String tagIdx = hashtag.get_id();
+
+                String courseIdx = hashtagReq.getCourseIdx();
 
                 HashtagCourse hashtagCourse = new HashtagCourse();
-                hashtagCourse.setTagIdx(tagIdx);
                 hashtagCourse.setCourseIdx(courseIdx);
-                if(selectedHashtag.isPresent()){ // 이미 등록된 해시태그일 경우
+
+                if(selectedHashtag.isPresent()){
+                    // 이미 등록된 해시태그일 경우(HashtagCourse 테이블에 저장)
                     hashtagCourse.setTagIdx(selectedHashtag.get().get_id());
                     hashtagCourseRepository.save(hashtagCourse);
                 }
-                else{ // 새로 해시태그 등록하는 경우
+                else{
+                    // 새로 해시태그 등록하는 경우(Hashtag, HashtagCourse 테이블에 저장)
                     String savedId = hashtagRepository.save(hashtag).get_id();
                     hashtagCourse.setTagIdx(savedId);
                     hashtagCourseRepository.save(hashtagCourse);
@@ -61,6 +63,9 @@ public class HashtagService {
     // 해시태그 조회
     public DefaultRes getHashtags(final String tag){
         Optional<List<Hashtag>> hashtag = hashtagRepository.findAllByTagInfoContaining(tag);
-        return hashtag.map(value -> DefaultRes.res(StatusCode.OK, "사용자 정보 조회 완료", value)).orElseGet(() -> DefaultRes.res(StatusCode.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+        if(hashtag.isPresent()){
+            if(hashtag.get().size() == 0){ return DefaultRes.res(StatusCode.NOT_FOUND, "해시태그를 찾을 수 없습니다."); }
+        }
+        return hashtag.map(value -> DefaultRes.res(StatusCode.OK, "해시태그 조회 성공", value)).orElseGet(() -> DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러"));
     }
 }

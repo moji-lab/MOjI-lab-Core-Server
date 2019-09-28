@@ -67,4 +67,30 @@ public class CommentController {
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Auth
+    @GetMapping("/boards/{boardIdx}")
+    public ResponseEntity getBoardComments(final HttpServletRequest httpServletRequest,
+                                           @PathVariable final String boardIdx) {
+        try {
+            final int userIdx = ((int) httpServletRequest.getAttribute("userIdx"));
+            return new ResponseEntity<>(commentService.getBoardComments(userIdx, boardIdx),HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Auth
+    @GetMapping("/courses/{courseIdx}")
+    public ResponseEntity getCourseComments(final HttpServletRequest httpServletRequest,
+                                           @PathVariable final String courseIdx) {
+        try {
+            final int userIdx = ((int) httpServletRequest.getAttribute("userIdx"));
+            return new ResponseEntity<>(commentService.getCourseComments(courseIdx),HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

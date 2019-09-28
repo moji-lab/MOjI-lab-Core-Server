@@ -34,6 +34,7 @@ public class Board implements Cloneable{
 
     private boolean open = true;
 
+
     private int userIdx;
 
     //공유 친구
@@ -41,7 +42,6 @@ public class Board implements Cloneable{
 
     // 댓글
     private List<Comment> comments = new ArrayList<Comment>();
-
 
     @Override
     public Object clone() throws CloneNotSupportedException{
