@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public class BoardService {
             BoardRes2 data = BoardRes2.getBoardRes2();
             data.getCourseIdx().clear();
 
-            board.getInfo().setWriteTime(new Date());
+            board.getInfo().setWriteTime(LocalDate.now());
             board.getInfo().setUserIdx(userIdx);
 
 
