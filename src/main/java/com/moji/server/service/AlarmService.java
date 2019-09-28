@@ -41,7 +41,7 @@ public class AlarmService {
             }
             else {alarm.setUserPhotoUrl("");}
             alarmRepository.save(alarm);
-            return DefaultRes.res(StatusCode.CREATED, "알람 저장 성공", userIdx);
+            return DefaultRes.res(StatusCode.CREATED, "알람 저장 성공");
         }
         catch(Exception e){
             log.info(e.getMessage());
