@@ -9,6 +9,7 @@ import java.util.List;
 
 @Data
 public class BoardRes {
+
     // user info
     private User user;
     private String _id;
