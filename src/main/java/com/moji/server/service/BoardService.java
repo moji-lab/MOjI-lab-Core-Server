@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,26 +44,43 @@ public class BoardService {
 
     //게시물 작성
     @Transactional
-    public DefaultRes saveBoard(final BoardReq board, int userIdx) {
+    public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException{
         try {
+            BoardRes2 data = BoardRes2.getBoardRes2();
+            data.getCourseIdx().clear();
 
             board.getInfo().setWriteTime(LocalDate.now());
             board.getInfo().setUserIdx(userIdx);
+
+
+            //DB에 저장
             boardRepository.save(board.getInfo());
             courseController.saveCourse(board);
 
             //공유
             for (int i = 0; i < board.getInfo().getShare().size(); i++) {
-                Board info = board.getInfo();
 
-                board.getInfo().setUserIdx(info.getShare().get(i));
-                board.getInfo().setOpen(false);
+                BoardReq info = (BoardReq) board.clone();
+                info.getInfo().set_id(null);
 
-                boardRepository.save(board.getInfo());
-                courseController.saveCourse(board);
+                for(int s = 0; s < board.getCourses().size(); s++) {
+                    for (int j = 0; j < board.getCourses().get(s).getPhotos().size(); j++) {
+                        info.getCourses().get(s).getPhotos().get(j).setPhoto(null);
+                        info.getCourses().get(s).getPhotos().get(j).setPhotoUrl(board.getCourses().get(s).getPhotos().get(j).getPhotoUrl());
+                    }
+                }
+                info.getInfo().getShare().clear();
+                info.getInfo().setOpen(false);
+                info.getInfo().setUserIdx(board.getInfo().getShare().get(i));
+
+
+                boardRepository.save(info.getInfo());
+                log.info("---------------------");
+                courseController.shareCourse(info);
+
             }
 
-            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
+            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD,data);
         } catch (Exception e) {
             log.info(e.getMessage());
             return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.FAIL_CREATE_BOARD);
