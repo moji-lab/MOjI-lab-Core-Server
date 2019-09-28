@@ -211,6 +211,8 @@ public class BoardService {
             boardRes.setScraped(scrapService.isScraped(userIdx, boardIdx));
             boardRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
             boardRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
+            boardRes.setComments(board.getComments());
+
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
             log.error(e.getMessage());
