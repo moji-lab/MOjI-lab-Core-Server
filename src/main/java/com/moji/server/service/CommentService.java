@@ -92,7 +92,7 @@ public class CommentService {
 
     public DefaultRes getBoardComments(final int userIdx, final String boardIdx) {
         BoardRes boardRes = boardService.getBoardInfo(boardIdx, userIdx).getData();
-        if (boardRes.getComments() != null) return DefaultRes.res(StatusCode.OK, "조회 성공", boardRes.getComments());
+        if (boardRes != null) return DefaultRes.res(StatusCode.OK, "조회 성공", boardRes.getComments());
         return DefaultRes.NOT_FOUND;
     }
 
