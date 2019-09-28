@@ -3,6 +3,7 @@ package com.moji.server.model;
 import com.moji.server.domain.User;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class BoardRes {
     private User user;
     private String _id;
     // user writeTime
-    private Date writeTime;
+    private LocalDate writeTime;
 
     private int likeCount;
     List<CourseRes> courseList;
