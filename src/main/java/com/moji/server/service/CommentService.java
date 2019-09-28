@@ -1,7 +1,9 @@
 package com.moji.server.service;
 
+import com.moji.server.domain.Board;
 import com.moji.server.domain.Comment;
 import com.moji.server.domain.Course;
+import com.moji.server.model.BoardRes;
 import com.moji.server.model.CommentReq;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.repository.CourseRepository;
@@ -43,6 +45,7 @@ public class CommentService {
 
     /**
      * course comment 저장
+     *
      * @param commentReq
      * @return
      */
@@ -61,6 +64,7 @@ public class CommentService {
 
     /**
      * board comment 저장
+     *
      * @param commentReq
      * @return
      */
@@ -84,5 +88,17 @@ public class CommentService {
         comment.setWriteTime(new Date());
 
         return comment;
+    }
+
+    public DefaultRes getBoardComments(final int userIdx, final String boardIdx) {
+        BoardRes boardRes = boardService.getBoardInfo(boardIdx, userIdx).getData();
+        if (boardRes.getComments() != null) return DefaultRes.res(StatusCode.OK, "조회 성공", boardRes.getComments());
+        return DefaultRes.NOT_FOUND;
+    }
+
+    public DefaultRes getCourseComments(final String courseIdx) {
+        Course course = courseService.getCourse(courseIdx);
+        if (course != null) return DefaultRes.res(StatusCode.OK, "조회 성공", course.getComments());
+        return DefaultRes.NOT_FOUND;
     }
 }

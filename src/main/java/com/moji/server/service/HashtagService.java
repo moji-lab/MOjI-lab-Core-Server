@@ -30,16 +30,16 @@ public class HashtagService {
     // 해시태그 저장
     public DefaultRes saveHashtags(final HashtagReq hashtagReq){
         try{
-            List<HashtagCourse> hashtagCourses = new ArrayList<>();
             for(int i = 0; i<hashtagReq.getHashtags().size(); i++){
                 Hashtag hashtag = hashtagReq.getHashtags().get(i);
 
                 Optional<Hashtag> selectedHashtag = hashtagRepository.findByTagInfo(hashtag.getTagInfo());
-                String courseIdx = hashtagReq.getCourseIdx(); String tagIdx = hashtag.get_id();
+
+                String courseIdx = hashtagReq.getCourseIdx();
 
                 HashtagCourse hashtagCourse = new HashtagCourse();
-                hashtagCourse.setTagIdx(tagIdx);
                 hashtagCourse.setCourseIdx(courseIdx);
+
                 if(selectedHashtag.isPresent()){
                     // 이미 등록된 해시태그일 경우(HashtagCourse 테이블에 저장)
                     hashtagCourse.setTagIdx(selectedHashtag.get().get_id());

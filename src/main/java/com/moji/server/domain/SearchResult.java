@@ -2,15 +2,26 @@ package com.moji.server.domain;
 
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+
 public class SearchResult {
     @Data
     static public class CourseSearchResult implements Comparable<CourseSearchResult> {
-        private Course course;
-        private User writer;
+        Course course;
+
+        // did like
+        private boolean isLiked;
+
+        // did scrap
+        private boolean isScraped;
+
+        // like count
         private int likeCount;
 
-        // 댓글 기능 구현 후 추가
-        private int commentCount;
+        // scrap count
+        private int scrapCount;
 
         @Override
         public int compareTo(CourseSearchResult courseSearchResult) {
@@ -22,11 +33,14 @@ public class SearchResult {
 
     @Data
     static public class BoardSearchResult implements Comparable<BoardSearchResult>{
-        private Board board;
-        private User writer;
+        private String nickName;
+        private String profileUrl;
+        private LocalDate date;
+        private String boardIdx;
+        private List<Photo> photoList;
+        private String place;
+        private boolean isLiked;
         private int likeCount;
-
-        // 댓글 기능 구현 후 추가
         private int commentCount;
 
         @Override

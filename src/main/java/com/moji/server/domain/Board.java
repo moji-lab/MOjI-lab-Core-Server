@@ -7,9 +7,11 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,7 +28,8 @@ public class Board {
     private String mainAddress;
     private String subAddress;
 
-    private Date writeTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate writeTime;
     private boolean open;
 
     private int userIdx;
@@ -36,5 +39,4 @@ public class Board {
 
     // 댓글
     private List<Comment> comments = new ArrayList<Comment>();
-
 }

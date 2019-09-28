@@ -45,7 +45,7 @@ public class AuthAspect {
     public Object around(final ProceedingJoinPoint pjp) throws Throwable {
         final String jwt = httpServletRequest.getHeader(AUTHORIZATION);
 
-        if (jwt == null) return UNAUTHORIZED_RES;
+        //if (jwt == null) return UNAUTHORIZED_RES;
         int userIdx = authService.authorization(jwt);
         if (userIdx == -1) return UNAUTHORIZED_RES;
          

@@ -7,10 +7,8 @@ import com.moji.server.util.auth.Auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -32,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<DefaultRes> signUp(final SignUpReq signUpReq) {
+    public ResponseEntity<DefaultRes> signUp(@RequestBody final SignUpReq signUpReq) {
         try {
             log.info(signUpReq.toString());
             return new ResponseEntity<>(userService.saveUser(signUpReq), HttpStatus.OK);
@@ -74,7 +72,32 @@ public class UserController {
     @GetMapping("/users")
     public ResponseEntity<DefaultRes> getUser(final HttpServletRequest httpServletRequest) {
         try {
-            int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(userService.findByUserIdx(userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @Auth
+    @PutMapping("/users/profile-image")
+    public ResponseEntity profileImage(final HttpServletRequest httpServletRequest,
+                                       final MultipartFile profileImage) {
+        try {
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(userService.changeProfileImage(userIdx, profileImage), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/users/{userIdx}")
+    public ResponseEntity getUserInfo(final HttpServletRequest httpServletRequest,
+                                      @PathVariable final int userIdx) {
+        try {
             return new ResponseEntity<>(userService.findByUserIdx(userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());
