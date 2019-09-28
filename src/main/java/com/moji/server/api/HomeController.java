@@ -39,9 +39,9 @@ public class HomeController {
             final String hotCategoryKeyword = "축제";
 
             ArrayList<String> hotKeywords = new ArrayList<String>(
-                    Arrays.asList("힐링", "가을"));
+                    Arrays.asList("힐링", "가을", "1박 2일", "음식", "전어"));
             ArrayList<String> recommendKeywords = new ArrayList<String>(
-                    Arrays.asList("1박 2일", "힐링"));
+                    Arrays.asList("1박 2일", "힐링", "1박 2일", "음식", "가을"));
 
             int userIdx = (int)httpServletRequest.getAttribute("userIdx");
 
