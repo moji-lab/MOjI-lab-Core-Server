@@ -12,6 +12,7 @@ import java.util.List;
 
 @Data
 public class FeedRes {
+    private int userIdx;
     private String nickName;
     private String profileUrl;
     private LocalDate date;
