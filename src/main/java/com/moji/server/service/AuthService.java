@@ -4,6 +4,7 @@ import com.moji.server.domain.SignUp;
 import com.moji.server.domain.User;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.LoginReq;
+import com.moji.server.model.LoginRes;
 import com.moji.server.repository.SignUpRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.AES256Util;
@@ -36,7 +37,13 @@ public class AuthService {
                     aes256Util.encrypt(loginReq.getPassword()));
             if (user.isPresent()) {
                 final String token = jwtService.create(user.get().getUserIdx());
-                return DefaultRes.res(StatusCode.CREATED, "로그인 성공", token);
+                final int userIdx = user.get().getUserIdx();
+                LoginRes res = new LoginRes();
+                res.setToken(token);
+                res.setNickname(user.get().getNickname());
+                res.setUserIdx(userIdx);
+                res.setProfileUrl(user.get().getPhotoUrl());
+                return DefaultRes.res(StatusCode.CREATED, "로그인 성공", res);
             }
             return DefaultRes.res(StatusCode.UNAUTHORIZED, "로그인 실패");
         } catch (Exception e) {

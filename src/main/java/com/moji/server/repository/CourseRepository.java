@@ -23,4 +23,6 @@ public interface CourseRepository extends MongoRepository<Course, String> {
 
     Optional<List<Course>> findAllByMainAddressContaining(final String keyword);
     Optional<List<Course>> findAllBySubAddressContaining(final String keyword);
+    void deleteByBoardIdx(final String boardIdx);
+    List<Course> findByBoardIdx(final String boardIdx);
 }

@@ -75,7 +75,7 @@ public class BoardController {
     @Auth
     @PutMapping("/boards/{boardIdx}/public")
     public ResponseEntity boardPublic(final HttpServletRequest httpServletRequest,
-                                  @PathVariable final String boardIdx) {
+                                      @PathVariable final String boardIdx) {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.boardPublic(boardIdx, userIdx), HttpStatus.OK);
@@ -85,4 +85,16 @@ public class BoardController {
         }
     }
 
+    @Auth
+    @DeleteMapping("/boards/{boardIdx}")
+    public ResponseEntity deleteBoard(final HttpServletRequest httpServletRequest,
+                                      @PathVariable final String boardIdx) {
+        try {
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(boardService.deleteBoard(boardIdx, userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
