@@ -240,7 +240,7 @@ public class BoardService {
 
         try {
             boardRepository.save(board);
-            return DefaultRes.res(StatusCode.NO_CONTENT, "공개 범위 변경 완료", board);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "공개 범위 변경 완료");
         } catch (Exception e) {
             log.error(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

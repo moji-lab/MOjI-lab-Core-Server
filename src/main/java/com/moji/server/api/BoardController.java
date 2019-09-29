@@ -73,7 +73,7 @@ public class BoardController {
     }
 
     @Auth
-    @PutMapping("/boards/{boardIdx}")
+    @PutMapping("/boards/{boardIdx}/public")
     public ResponseEntity boardPublic(final HttpServletRequest httpServletRequest,
                                   @PathVariable final String boardIdx) {
         try {
