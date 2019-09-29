@@ -17,8 +17,10 @@ public class Alarm {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String _id;
 
-    private int userIdx;
-    private String userPhotoUrl;
+    private int senderIdx;
+    private String senderPhotoUrl;
+
+    private int receiverIdx;
 
     private String message;
 
