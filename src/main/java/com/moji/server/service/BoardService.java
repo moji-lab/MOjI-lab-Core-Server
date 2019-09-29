@@ -7,14 +7,18 @@ import com.moji.server.repository.BoardRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.moji.server.model.DefaultRes.DB_ERROR;
 
 @Slf4j
 @Service
@@ -44,7 +48,7 @@ public class BoardService {
 
     //게시물 작성
     @Transactional
-    public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException{
+    public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException {
         try {
             BoardRes2 data = BoardRes2.getBoardRes2();
             data.getCourseIdx().clear();
@@ -63,7 +67,7 @@ public class BoardService {
                 BoardReq info = (BoardReq) board.clone();
                 info.getInfo().set_id(null);
 
-                for(int s = 0; s < board.getCourses().size(); s++) {
+                for (int s = 0; s < board.getCourses().size(); s++) {
                     for (int j = 0; j < board.getCourses().get(s).getPhotos().size(); j++) {
                         info.getCourses().get(s).getPhotos().get(j).setPhoto(null);
                         info.getCourses().get(s).getPhotos().get(j).setPhotoUrl(board.getCourses().get(s).getPhotos().get(j).getPhotoUrl());
@@ -80,15 +84,16 @@ public class BoardService {
 
             }
 
-            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD,data);
+            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD, data);
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.FAIL_CREATE_BOARD);
         }
     }
 
     public Board getBoard(String boardIdx) {
-        return boardRepository.findBy_id(boardIdx);
+        return boardRepository.findBy_id(boardIdx).get();
     }
 
     public void saveComment(String boardIdx, Comment comment) {
@@ -166,7 +171,7 @@ public class BoardService {
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
-                    if(courseList.get(j).getPhotos().get(0) != null) {
+                    if (courseList.get(j).getPhotos().get(0) != null) {
                         photoList.add(courseList.get(j).getPhotos().get(0));
                     }
                 }
@@ -198,7 +203,7 @@ public class BoardService {
         try {
             final BoardRes boardRes = new BoardRes();
             final Optional<User> user = userRepository.findByUserIdx(userIdx);
-            final Board board = boardRepository.findBy_id(boardIdx);
+            final Board board = boardRepository.findBy_id(boardIdx).get();
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
@@ -217,6 +222,28 @@ public class BoardService {
         } catch (Exception e) {
             log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public DefaultRes boardPublic(final String boardIdx, final int userIdx) {
+        Optional<Board> boardOptional = boardRepository.findBy_id(boardIdx);
+        if (!boardOptional.isPresent()) return DefaultRes.NOT_FOUND;
+        Board board = boardOptional.get();
+        if (board.getUserIdx() != userIdx) return DefaultRes.UNAUTHORIZED;
+        if (board.isOpen()) {
+            board.setOpen(false);
+        } else {
+            board.setOpen(true);
+        }
+
+        try {
+            boardRepository.save(board);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "공개 범위 변경 완료", board);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
         }
     }
 }

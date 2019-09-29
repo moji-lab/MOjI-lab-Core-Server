@@ -115,7 +115,7 @@ public class SearchService {
             List<BoardSearchResult> boards = new ArrayList<>();
             for (int i = 0; i < addresses.get().size(); i++) {
                 String boardIdx = addresses.get().get(i).getBoardIdx();
-                Board board = boardRepository.findBy_id(boardIdx);
+                Board board = boardRepository.findBy_id(boardIdx).get();
                 // 날짜 필터 적용시
                 if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
                     if(board.getWriteTime().isBefore(searchReq.getStartDate()) ||

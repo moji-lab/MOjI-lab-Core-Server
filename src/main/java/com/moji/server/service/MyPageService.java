@@ -61,7 +61,7 @@ public class MyPageService {
         MyPageRes myPageRes = getMyPageRes(defaultInfo);
         List<Board> list = new LinkedList<>();
         for (Scrap scrap : defaultInfo.scrapList) {
-            list.add(boardRepository.findBy_id(scrap.getBoardIdx()));
+            list.add(boardRepository.findBy_id(scrap.getBoardIdx()).get());
         }
         myPageRes.setFeedList((List<BoardRes>) boardService.getScrapList(userIdx, list).getData());
         return DefaultRes.res(StatusCode.OK, "조회 성공", myPageRes);

@@ -34,7 +34,6 @@ public class Board implements Cloneable{
 
     private boolean open = true;
 
-
     private int userIdx;
 
     //공유 친구
