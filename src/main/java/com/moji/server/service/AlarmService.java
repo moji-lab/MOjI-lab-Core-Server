@@ -26,7 +26,7 @@ public class AlarmService {
     }
 
     public DefaultRes getAlarms(final int userIdx){
-        Optional<List<Alarm>> alarms = alarmRepository.findByUserIdx(userIdx);
+        Optional<List<Alarm>> alarms = alarmRepository.findByReceiverIdx(userIdx);
         if(alarms.isPresent()){
             if(alarms.get().size() == 0){ return DefaultRes.res(StatusCode.NOT_FOUND, "알람이 없습니다."); }
         }
@@ -35,13 +35,13 @@ public class AlarmService {
 
     public DefaultRes saveAlarm(final int userIdx, final Alarm alarm){
         try{
-            alarm.setUserIdx(userIdx);
+            alarm.setSenderIdx(userIdx);
             if(userService.findPhotoUrlByUserIdx(userIdx).isPresent()){
-                alarm.setUserPhotoUrl(userService.findPhotoUrlByUserIdx(userIdx).get());
+                alarm.setSenderPhotoUrl(userService.findPhotoUrlByUserIdx(userIdx).get());
             }
-            else {alarm.setUserPhotoUrl("");}
+            else {alarm.setSenderPhotoUrl("");}
             alarmRepository.save(alarm);
-            return DefaultRes.res(StatusCode.CREATED, "알람 저장 성공", userIdx);
+            return DefaultRes.res(StatusCode.CREATED, "알람 저장 성공");
         }
         catch(Exception e){
             log.info(e.getMessage());
