@@ -7,4 +7,5 @@ public interface LikeBoardRepository extends MongoRepository<LikeBoard, String> 
     LikeBoard findByBoardIdxAndUserIdx(String postIdx, int userIdx);
 
     int countByBoardIdx(String boardIdx);
+    void deleteByBoardIdx(final String boardIdx);
 }

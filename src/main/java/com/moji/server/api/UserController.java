@@ -86,6 +86,7 @@ public class UserController {
     public ResponseEntity profileImage(final HttpServletRequest httpServletRequest,
                                        final MultipartFile profileImage) {
         try {
+            log.info(profileImage.getOriginalFilename());
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(userService.changeProfileImage(userIdx, profileImage), HttpStatus.OK);
         } catch (Exception e) {

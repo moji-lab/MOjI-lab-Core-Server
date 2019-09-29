@@ -240,7 +240,26 @@ public class BoardService {
 
         try {
             boardRepository.save(board);
-            return DefaultRes.res(StatusCode.NO_CONTENT, "공개 범위 변경 완료", board);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "공개 범위 변경 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
+        }
+    }
+
+    @Transactional
+    public DefaultRes deleteBoard(final String boardIdx, final int userIdx) {
+        Optional<Board> boardOptional = boardRepository.findBy_id(boardIdx);
+        if (!boardOptional.isPresent()) return DefaultRes.NOT_FOUND;
+        Board board = boardOptional.get();
+        if (board.getUserIdx() != userIdx) return DefaultRes.UNAUTHORIZED;
+        try {
+            boardRepository.delete(board);
+            scrapService.deleteAllScrap(boardIdx);
+            courseService.deleteAllCourse(boardIdx);
+            likeService.deleteBoardLike(boardIdx);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
         } catch (Exception e) {
             log.error(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

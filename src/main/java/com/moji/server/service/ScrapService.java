@@ -57,6 +57,16 @@ public class ScrapService {
         }
     }
 
+    @Transactional
+    public void deleteAllScrap(final String boardIdx) {
+        try {
+            scrapRepository.deleteByBoardIdx(boardIdx);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+    }
+
     public boolean isScraped(final int userIdx, final String boardIdx) {
         Optional<Scrap> scrap = scrapRepository.findByUserIdxAndBoardIdx(userIdx, boardIdx);
         return scrap.isPresent();

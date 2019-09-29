@@ -11,6 +11,8 @@ import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Slf4j
 @Service
@@ -107,5 +109,25 @@ public class LikeService {
     }
     public boolean isLikedCourse(String courseIdx, int userIdx) {
         return likeCourseRepository.findByCourseIdxAndUserIdx(courseIdx, userIdx) != null;
+    }
+
+    @Transactional
+    public void deleteBoardLike(final String boardIdx) {
+        try {
+            likeBoardRepository.deleteByBoardIdx(boardIdx);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+    }
+
+    @Transactional
+    public void deleteCourseLike(final String courseIdx) {
+        try {
+            likeCourseRepository.deleteByCourseIdx(courseIdx);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
     }
 }

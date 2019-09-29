@@ -12,9 +12,11 @@ import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
@@ -160,5 +162,19 @@ public class CourseService {
         }
 
         return courseResList;
+    }
+
+    @Transactional
+    public void deleteAllCourse(final String boardIdx) {
+        try {
+            List<Course> courseList = courseRepository.findByBoardIdx(boardIdx);
+            for (Course c : courseList) {
+                likeService.deleteCourseLike(c.get_id());
+            }
+            courseRepository.deleteByBoardIdx(boardIdx);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
     }
 }
