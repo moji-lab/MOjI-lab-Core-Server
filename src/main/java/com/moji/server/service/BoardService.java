@@ -179,6 +179,7 @@ public class BoardService {
                 FeedRes feedRes = new FeedRes();
                 feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
                 feedRes.setProfileUrl(user.get().getPhotoUrl());
+                feedRes.setUserIdx(user.get().getUserIdx());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
                 feedRes.setComments(board.getComments());
