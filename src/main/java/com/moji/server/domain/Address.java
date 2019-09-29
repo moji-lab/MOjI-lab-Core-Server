@@ -11,6 +11,9 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int addressIdx;
 
-    private String boardIdx;
-    private String place;
+    private String mainAddress;
+    private String subAddress;
+
+    private String lat;
+    private String lng;
 }

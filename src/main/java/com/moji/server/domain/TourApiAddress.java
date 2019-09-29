@@ -6,4 +6,9 @@ import lombok.Data;
 public class TourApiAddress {
     private String mainAddress;
     private String subAddress;
+
+    //위도
+    private String lat;
+    //경도
+    private String lng;
 }

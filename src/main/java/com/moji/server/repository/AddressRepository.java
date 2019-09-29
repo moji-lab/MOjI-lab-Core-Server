@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AddressRepository extends JpaRepository<Address, Integer> {
-    Optional<List<Address>> findAllByPlaceContaining(final String place);
+    Optional<List<Address>> findAllByMainAddressContaining(final String place);
 }

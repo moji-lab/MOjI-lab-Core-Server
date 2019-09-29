@@ -24,7 +24,6 @@ public class SearchService {
     private final HashtagRepository hashtagRepository;
     private final HashtagCourseRepository hashtagCourseRepository;
     private final CourseRepository courseRepository;
-    private final AddressRepository addressRepository;
     private final BoardRepository boardRepository;
     private final LikeCourseRepository likeCourseRepository;
     private final CourseService courseService;
@@ -35,9 +34,7 @@ public class SearchService {
     public SearchService(final HashtagRepository hashtagRepository,
                          final HashtagCourseRepository hashtagCourseRepository,
                          final CourseRepository courseRepository,
-                         final AddressRepository addressRepository,
                          final BoardRepository boardRepository,
-                         final LikeBoardRepository likeBoardRepository,
                          final LikeCourseRepository likeCourseRepository,
                          final CourseService courseService,
                          final LikeService likeService,
@@ -45,7 +42,6 @@ public class SearchService {
         this.hashtagRepository = hashtagRepository;
         this.hashtagCourseRepository = hashtagCourseRepository;
         this.courseRepository = courseRepository;
-        this.addressRepository = addressRepository;
         this.boardRepository = boardRepository;
         this.likeCourseRepository = likeCourseRepository;
         this.courseService = courseService;
@@ -110,49 +106,56 @@ public class SearchService {
 
     public Optional<SearchBoardRes> getSearchBoardRes(final SearchReq searchReq, final int userIdx) {
         SearchBoardRes searchBoardRes = new SearchBoardRes();
-        Optional<List<Address>> addresses = addressRepository.findAllByPlaceContaining(searchReq.getKeyword());
-        if(addresses.isPresent()) {
+        Optional<List<Board>> boardsByMainAddress = boardRepository.findAllByMainAddressContaining(searchReq.getKeyword());
+        Optional<List<Board>> boardsBySubAddress = boardRepository.findAllBySubAddressContaining(searchReq.getKeyword());
+        if (boardsByMainAddress.isPresent() || boardsBySubAddress.isPresent()) {
             List<BoardSearchResult> boards = new ArrayList<>();
-            for (int i = 0; i < addresses.get().size(); i++) {
-                String boardIdx = addresses.get().get(i).getBoardIdx();
-                Board board = boardRepository.findBy_id(boardIdx).get();
-                // 날짜 필터 적용시
-                if(searchReq.getStartDate() != null && searchReq.getEndDate() != null){
-                    if(board.getWriteTime().isBefore(searchReq.getStartDate()) ||
-                            board.getWriteTime().isAfter(searchReq.getEndDate())) continue;
+            Optional<List<Board>> temp;
+            for (int k = 0; k < 2; k++) {
+                if (k == 0) temp = boardsByMainAddress;
+                else temp = boardsBySubAddress;
+                for (int i = 0; i < temp.get().size(); i++) {
+                    String boardIdx = temp.get().get(i).get_id();
+                    Board board = boardRepository.findBy_id(boardIdx);
+
+                    // 날짜 필터 적용시
+                    if (searchReq.getStartDate() != null && searchReq.getEndDate() != null) {
+                        if (board.getWriteTime().isBefore(searchReq.getStartDate()) ||
+                                board.getWriteTime().isAfter(searchReq.getEndDate())) continue;
+                    }
+                    Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
+
+                    if (!user.isPresent()) continue;
+
+                    List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
+                    log.info(courseList.toString());
+                    if (courseList.size() == 0) { // 코스 정보가 없을 경우?
+                        continue;
+                    }
+                    List<Photo> photoList = new ArrayList<>();
+
+                    for (int j = 0; j < courseList.size(); j++) {
+                        photoList.add(courseList.get(j).getPhotos().get(0));
+                    }
+
+                    BoardSearchResult boardSearchResult = new BoardSearchResult();
+                    boardSearchResult.setNickName(user.get().getNickname());
+                    boardSearchResult.setProfileUrl(user.get().getPhotoUrl());
+                    boardSearchResult.setBoardIdx(board.get_id());
+                    boardSearchResult.setPlace(board.getSubAddress());
+                    boardSearchResult.setPhotoList(photoList);
+
+                    boardSearchResult.setDate(board.getWriteTime());
+                    boardSearchResult.setCommentCount(board.getComments().size());
+                    boardSearchResult.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
+                    boardSearchResult.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+                    boards.add(boardSearchResult);
+                    boards.add(boardSearchResult);
                 }
-                Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
-
-                if (!user.isPresent()) continue;
-
-                List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
-                log.info(courseList.toString());
-                if (courseList.size() == 0) { // 코스 정보가 없을 경우?
-                    continue;
-                }
-                List<Photo> photoList = new ArrayList<>();
-
-                for (int j = 0; j < courseList.size(); j++) {
-                    photoList.add(courseList.get(j).getPhotos().get(0));
-                }
-
-                BoardSearchResult boardSearchResult = new BoardSearchResult();
-                boardSearchResult.setNickName(user.get().getNickname());
-                boardSearchResult.setProfileUrl(user.get().getPhotoUrl());
-                boardSearchResult.setBoardIdx(board.get_id());
-                boardSearchResult.setPlace(board.getSubAddress());
-                boardSearchResult.setPhotoList(photoList);
-
-                boardSearchResult.setDate(board.getWriteTime());
-                boardSearchResult.setCommentCount(board.getComments().size());
-                boardSearchResult.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
-                boardSearchResult.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
-                boards.add(boardSearchResult);
-                boards.add(boardSearchResult);
-            }
                 Collections.sort(boards);
                 searchBoardRes = new SearchBoardRes(boards);
             }
+        }
         return Optional.ofNullable(searchBoardRes);
     }
 

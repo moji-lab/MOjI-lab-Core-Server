@@ -15,30 +15,33 @@ import java.util.Optional;
 public class AddressService {
 
     private final AddressRepository addressRepository;
+    private final TourApiService tourApiService;
 
     // 생성자 의존성 주입
-    public AddressService(final AddressRepository addressRepository){
+    public AddressService(final AddressRepository addressRepository,
+                          final TourApiService tourApiService){
         this.addressRepository = addressRepository;
+        this.tourApiService = tourApiService;
     }
 
     // 기록하기 핵심 주소 저장
+
     public DefaultRes saveBoardAddress(final Address address){
         try{
+            if(tourApiService.getSubAddressByGoogleMapGeoCodingApi(address.getLat(),address.getLng()).isPresent()){
+                String subAddress = tourApiService.getSubAddressByGoogleMapGeoCodingApi(address.getLat(),address.getLng()).get();
+                address.setSubAddress(subAddress);
+            }
+            else{
+                return DefaultRes.res(StatusCode.NOT_FOUND, "해당 위도, 경도와 일치하는 주소가 없습니다.");
+            }
             addressRepository.save(address);
             return DefaultRes.res(StatusCode.CREATED, "핵심 주소가 등록 되었습니다.");
         }
         catch(Exception e){
             log.info(e.getMessage());
-            return DefaultRes.res(StatusCode.DB_ERROR, "핵심 주소 등록에 실패하였습니다.");
+            return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
         }
     }
 
-    // 기록하기 핵심 주소 조회
-    public DefaultRes getBoardAddresses(final String keyword){
-        Optional<List<Address>> addressList = addressRepository.findAllByPlaceContaining(keyword);
-        if(addressList.isPresent()){
-            if(addressList.get().size() == 0){ return DefaultRes.res(StatusCode.NOT_FOUND, "핵심 주소를 찾을 수 없습니다."); }
-        }
-        return addressList.map(value -> DefaultRes.res(StatusCode.OK, "핵심 주소 조회 성공", value)).orElseGet(() -> DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러"));
-    }
 }
