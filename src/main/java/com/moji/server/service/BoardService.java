@@ -7,16 +7,18 @@ import com.moji.server.repository.BoardRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static com.moji.server.model.DefaultRes.DB_ERROR;
 
 @Slf4j
 @Service
@@ -27,50 +29,71 @@ public class BoardService {
     private final CourseController courseController;
     private final CourseService courseService;
     private final LikeService likeService;
+    private final ScrapService scrapService;
 
     //생성자 의존성 주입
     public BoardService(final BoardRepository boardRepository,
                         final CourseController courseController,
                         final CourseService courseService,
                         final LikeService likeService,
-                        final UserRepository userRepository) {
+                        final UserRepository userRepository,
+                        final ScrapService scrapService) {
         this.boardRepository = boardRepository;
         this.courseController = courseController;
         this.courseService = courseService;
         this.likeService = likeService;
         this.userRepository = userRepository;
+        this.scrapService = scrapService;
     }
 
     //게시물 작성
     @Transactional
-    public DefaultRes saveBoard(final BoardReq board, int userIdx) {
+    public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException {
         try {
+            BoardRes2 data = BoardRes2.getBoardRes2();
+            data.getCourseIdx().clear();
 
             board.getInfo().setWriteTime(LocalDate.now());
             board.getInfo().setUserIdx(userIdx);
+
+
+            //DB에 저장
             boardRepository.save(board.getInfo());
             courseController.saveCourse(board);
 
             //공유
             for (int i = 0; i < board.getInfo().getShare().size(); i++) {
-                Board info = board.getInfo();
 
-                board.getInfo().setUserIdx(info.getShare().get(i));
-                board.getInfo().setOpen(false);
+                BoardReq info = (BoardReq) board.clone();
+                info.getInfo().set_id(null);
 
-                boardRepository.save(board.getInfo());
-                courseController.saveCourse(board);
+                for (int s = 0; s < board.getCourses().size(); s++) {
+                    for (int j = 0; j < board.getCourses().get(s).getPhotos().size(); j++) {
+                        info.getCourses().get(s).getPhotos().get(j).setPhoto(null);
+                        info.getCourses().get(s).getPhotos().get(j).setPhotoUrl(board.getCourses().get(s).getPhotos().get(j).getPhotoUrl());
+                    }
+                }
+                info.getInfo().getShare().clear();
+                info.getInfo().setOpen(false);
+                info.getInfo().setUserIdx(board.getInfo().getShare().get(i));
+
+
+                boardRepository.save(info.getInfo());
+                log.info("---------------------");
+                courseController.shareCourse(info);
+
             }
 
-            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
+            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD, data);
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.FAIL_CREATE_BOARD);
         }
     }
 
     public Board getBoard(String boardIdx) {
-        return boardRepository.findBy_id(boardIdx);
+        return boardRepository.findBy_id(boardIdx).get();
     }
 
     public void saveComment(String boardIdx, Comment comment) {
@@ -104,9 +127,7 @@ public class BoardService {
                 personRes.get().setNickname(email.get().getNickname());
                 personRes.get().setUserIdx(email.get().getUserIdx());
                 personRes.get().setPhotoUrl(email.get().getPhotoUrl());
-            }
-            else
-            {
+            } else {
                 personRes.get().setEmail(nickname.get().getEmail());
                 personRes.get().setNickname(nickname.get().getNickname());
                 personRes.get().setUserIdx(nickname.get().getUserIdx());
@@ -121,55 +142,69 @@ public class BoardService {
         }
     }
 
-    public DefaultRes getRecentFeed(int userIdx) {
-        try {
-            // TODO: 공개 대상인지 판단하여 공개 설정
-            List<Board> boardList = boardRepository.findByOpenOrderByWriteTimeDesc(true); // TODO: 값 조정될 필요성
+    public DefaultRes getRecentFeed(final int userIdx) {
+        return getDefault(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
+    }
 
+    public DefaultRes getBoardList(final int userIdx) {
+        return getDefault(userIdx, boardRepository.findByUserIdx(userIdx));
+    }
+
+    public DefaultRes getScrapList(final int userIdx, final List<Board> list) {
+        return getDefault(userIdx, list);
+    }
+
+    private DefaultRes getDefault(final int userIdx, final List<Board> boardList) {
+        try {
             List<FeedRes> feedResList = new ArrayList<>();
-            for (int i = 0; i < boardList.size(); i++) {
-                Board board = boardList.get(i);
+            for (Board board : boardList) {
                 Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
 
-                if(!user.isPresent()) {
+                if (!user.isPresent()) {
                     continue;
                 }
 
                 List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
-                log.info(courseList.toString());
                 if (courseList.size() == 0) { // 코스 정보가 없을 경우?
                     continue;
                 }
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
-                    photoList.add(courseList.get(j).getPhotos().get(0));
+                    if (courseList.get(j).getPhotos().get(0) != null) {
+                        photoList.add(courseList.get(j).getPhotos().get(0));
+                    }
                 }
 
                 FeedRes feedRes = new FeedRes();
                 feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
                 feedRes.setProfileUrl(user.get().getPhotoUrl());
+                feedRes.setUserIdx(user.get().getUserIdx());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
+                feedRes.setComments(board.getComments());
                 feedRes.setPhotoList(photoList);
                 feedRes.setDate(board.getWriteTime());
                 feedRes.setCommentCount(board.getComments().size());
                 feedRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
                 feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+                feedRes.setMainAddress(board.getMainAddress());
+                feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
         } catch (Exception e) {
             e.printStackTrace();
+            log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public DefaultRes<BoardRes> getBoardInfo(String boardIdx, int userIdx) {
+    public DefaultRes<BoardRes> getBoardInfo(final String boardIdx, final int userIdx) {
         try {
-            BoardRes boardRes = new BoardRes();
-            Optional<User> user = userRepository.findByUserIdx(userIdx);
-            Board board = boardRepository.findBy_id(boardIdx);
+            final BoardRes boardRes = new BoardRes();
+            final Optional<User> user = userRepository.findByUserIdx(userIdx);
+            final Board board = boardRepository.findBy_id(boardIdx).get();
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
@@ -179,10 +214,56 @@ public class BoardService {
             boardRes.set_id(boardIdx);
             boardRes.setWriteTime(board.getWriteTime());
             boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
+            boardRes.setScraped(scrapService.isScraped(userIdx, boardIdx));
+            boardRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+            boardRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
+            boardRes.setComments(board.getComments());
+
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public DefaultRes boardPublic(final String boardIdx, final int userIdx) {
+        Optional<Board> boardOptional = boardRepository.findBy_id(boardIdx);
+        if (!boardOptional.isPresent()) return DefaultRes.NOT_FOUND;
+        Board board = boardOptional.get();
+        if (board.getUserIdx() != userIdx) return DefaultRes.UNAUTHORIZED;
+        if (board.isOpen()) {
+            board.setOpen(false);
+        } else {
+            board.setOpen(true);
+        }
+
+        try {
+            boardRepository.save(board);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "공개 범위 변경 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
+        }
+    }
+
+    @Transactional
+    public DefaultRes deleteBoard(final String boardIdx, final int userIdx) {
+        Optional<Board> boardOptional = boardRepository.findBy_id(boardIdx);
+        if (!boardOptional.isPresent()) return DefaultRes.NOT_FOUND;
+        Board board = boardOptional.get();
+        if (board.getUserIdx() != userIdx) return DefaultRes.UNAUTHORIZED;
+        try {
+            boardRepository.delete(board);
+            scrapService.deleteAllScrap(boardIdx);
+            courseService.deleteAllCourse(boardIdx);
+            likeService.deleteBoardLike(boardIdx);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
         }
     }
 }

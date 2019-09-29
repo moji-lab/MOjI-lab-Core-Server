@@ -12,9 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
+import static com.moji.server.model.DefaultRes.BAD_REQUEST;
 import static com.moji.server.model.DefaultRes.DB_ERROR;
 
 /**
@@ -77,11 +79,6 @@ public class UserService {
                     .nickname(signUpReq.getNickname())
                     .photoUrl(signUpReq.getPhotoUrl())
                     .build();
-            if (signUpReq.getProfile() != null) {
-                log.info("image upload");
-                signUp.setPhotoUrl(s3FileUploadService.upload(signUpReq.getProfile()));
-                signUp.setPhotoUrl("https://project-moji2.s3.ap-northeast-2.amazonaws.com/cb110d18590fb2d338117e43667a7e53.jpg");
-            }
             signUpRepository.save(signUp);
             return DefaultRes.res(StatusCode.CREATED, "회원 가입 완료");
         } catch (Exception e) {
@@ -111,5 +108,21 @@ public class UserService {
     public DefaultRes validateNickName(final String nickName) {
         Optional<User> user = userRepository.findByNickname(nickName);
         return user.map(value -> DefaultRes.res(StatusCode.BAD_REQUEST, "중복된 닉네임입니다.")).orElseGet(() -> DefaultRes.res(StatusCode.OK, "사용 가능 합니다."));
+    }
+
+    @Transactional
+    public DefaultRes changeProfileImage(final int userIdx, final MultipartFile multipartFile) {
+        try {
+            if(multipartFile.isEmpty()) return BAD_REQUEST;
+            final String url = s3FileUploadService.upload(multipartFile);
+            User user = userRepository.findById(userIdx).get();
+            user.setPhotoUrl(url);
+            userRepository.save(user);
+            return DefaultRes.res(StatusCode.CREATED, "사진 수정 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
+        }
     }
 }

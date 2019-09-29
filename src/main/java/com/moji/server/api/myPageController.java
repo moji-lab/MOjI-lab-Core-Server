@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -39,14 +41,14 @@ public class myPageController {
 
     @Auth
     @GetMapping("/mypage/{index}")
-    public ResponseEntity<DefaultRes> getMyPage(final HttpServletRequest httpServletRequest,
-                                                @PathVariable final String index) {
+    public ResponseEntity getMyPage(final HttpServletRequest httpServletRequest,
+                                    @PathVariable final String index) {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             DefaultRes res = null;
             switch (index) {
                 case "1": {
-                    res = myPageService.getMyCourseList(userIdx);
+                    res = myPageService.getMyBoardList(userIdx);
                     break;
                 }
                 case "2": {

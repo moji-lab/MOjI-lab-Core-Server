@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface ScrapRepository extends JpaRepository<Scrap, Integer> {
     List<Scrap> findByUserIdx(final int userIdx);
     Optional<Scrap> findByUserIdxAndBoardIdx(final int userIdx, final String boardIdx);
+    void deleteByBoardIdx(final String boardIdx);
 }
