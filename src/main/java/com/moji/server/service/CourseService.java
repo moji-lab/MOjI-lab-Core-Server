@@ -4,6 +4,7 @@ import com.moji.server.domain.Comment;
 import com.moji.server.domain.Course;
 import com.moji.server.domain.Photo;
 import com.moji.server.model.BoardReq;
+import com.moji.server.model.BoardRes2;
 import com.moji.server.model.CourseRes;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.repository.CourseRepository;
@@ -11,15 +12,18 @@ import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
 @Service
 public class CourseService {
 
+    BoardRes2 data = BoardRes2.getBoardRes2();
     private final LikeService likeService;
     private final CourseRepository courseRepository;
     private final S3FileUploadService s3MultipartService;
@@ -42,16 +46,15 @@ public class CourseService {
 
 
             for (int i = 0; i < size; i++) {
-                Course course = board.getCourses().get(i);
+                Course course = (Course)board.getCourses().get(i).clone();
                 course.setBoardIdx(board.getInfo().get_id());
                 course.setUserIdx(board.getInfo().getUserIdx());
-
-                log.info(course.toString());
 
                 //사진
                 List<Photo> photos = new ArrayList<Photo>();
                 for (int j = 0; j < course.getPhotos().size(); j++) {
-                    Photo photo = course.getPhotos().get(j);
+
+                    Photo photo = (Photo)course.getPhotos().get(j).clone();
                     String url = s3MultipartService.upload(photo.getPhoto());
 
                     photo.setPhotoUrl(url);
@@ -63,7 +66,9 @@ public class CourseService {
                 course.setPhotos(photos);
 
                 courseRepository.save(course);
+                data.getCourseIdx().add(course.get_id());
             }
+
 
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
         } catch (Exception e) {
@@ -72,6 +77,28 @@ public class CourseService {
         }
     }
 
+    //코스 공ㅇㅍ
+    @Transactional
+    public DefaultRes shareCourse(final BoardReq board) {
+        try {
+            int size = board.getCourses().size();
+
+            for (int i = 0; i < size; i++) {
+                Course course = (Course)board.getCourses().get(i).clone();
+                course.setBoardIdx(board.getInfo().get_id());
+                course.setUserIdx(board.getInfo().getUserIdx());
+
+                courseRepository.save(course);
+                data.getCourseIdx().add(course.get_id());
+            }
+
+
+            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
+        }
+    }
     /**
      * course 조회
      *
@@ -135,5 +162,19 @@ public class CourseService {
         }
 
         return courseResList;
+    }
+
+    @Transactional
+    public void deleteAllCourse(final String boardIdx) {
+        try {
+            List<Course> courseList = courseRepository.findByBoardIdx(boardIdx);
+            for (Course c : courseList) {
+                likeService.deleteCourseLike(c.get_id());
+            }
+            courseRepository.deleteByBoardIdx(boardIdx);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
     }
 }
