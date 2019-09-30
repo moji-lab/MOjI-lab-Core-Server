@@ -116,7 +116,7 @@ public class SearchService {
                 else temp = boardsBySubAddress;
                 for (int i = 0; i < temp.get().size(); i++) {
                     String boardIdx = temp.get().get(i).get_id();
-                    Board board = boardRepository.findBy_id(boardIdx);
+                    Board board = boardRepository.findBy_id(boardIdx).get();
 
                     // 날짜 필터 적용시
                     if (searchReq.getStartDate() != null && searchReq.getEndDate() != null) {
