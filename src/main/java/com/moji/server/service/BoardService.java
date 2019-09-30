@@ -7,7 +7,6 @@ import com.moji.server.repository.BoardRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -190,6 +189,7 @@ public class BoardService {
                 feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
                 feedRes.setMainAddress(board.getMainAddress());
                 feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
+                feedRes.setOpen(board.isOpen());
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
@@ -203,8 +203,8 @@ public class BoardService {
     public DefaultRes<BoardRes> getBoardInfo(final String boardIdx, final int userIdx) {
         try {
             final BoardRes boardRes = new BoardRes();
-            final Optional<User> user = userRepository.findByUserIdx(userIdx);
             final Board board = boardRepository.findBy_id(boardIdx).get();
+            final Optional<User> user = userRepository.findById(board.getUserIdx());
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
