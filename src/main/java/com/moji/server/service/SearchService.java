@@ -94,7 +94,7 @@ public class SearchService {
             Optional<SearchCourseRes> searchCourseRes = this.getSearchCourseRes(searchReq, userIdx);
             SearchPlaceRes searchPlaceRes = new SearchPlaceRes(searchBoardRes.get(), searchCourseRes.get());
 
-            if(searchBoardRes.get().getBoards() == null && searchCourseRes.get().getCourses().size() == 0){
+            if(searchBoardRes.get().getBoards() == null || searchCourseRes.get().getCourses().size() == 0){
                 return DefaultRes.res(StatusCode.NOT_FOUND, "검색된 데이터가 없습니다.");
             }
             return DefaultRes.res(StatusCode.OK, "검색 성공", searchPlaceRes);
@@ -116,7 +116,7 @@ public class SearchService {
                 else temp = boardsBySubAddress;
                 for (int i = 0; i < temp.get().size(); i++) {
                     String boardIdx = temp.get().get(i).get_id();
-                    Board board = boardRepository.findBy_id(boardIdx);
+                    Board board = boardRepository.findBy_id(boardIdx).get();
 
                     // 날짜 필터 적용시
                     if (searchReq.getStartDate() != null && searchReq.getEndDate() != null) {
