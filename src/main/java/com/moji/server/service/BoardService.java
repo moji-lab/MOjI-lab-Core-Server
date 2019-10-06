@@ -49,6 +49,9 @@ public class BoardService {
     @Transactional
     public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException {
         try {
+
+            log.info("보드 서비스로 들어옴" +
+                    "");
             BoardRes2 data = BoardRes2.getBoardRes2();
             data.getCourseIdx().clear();
 
@@ -57,9 +60,7 @@ public class BoardService {
 
 
             //DB에 저장
-            log.info("저장");
             boardRepository.save(board.getInfo());
-            log.info("완료");
             courseController.saveCourse(board);
 
             //공유
@@ -69,6 +70,7 @@ public class BoardService {
                 info.getInfo().set_id(null);
 
                 for (int s = 0; s < board.getCourses().size(); s++) {
+
                     for (int j = 0; j < board.getCourses().get(s).getPhotos().size(); j++) {
                         info.getCourses().get(s).getPhotos().get(j).setPhoto(null);
                         info.getCourses().get(s).getPhotos().get(j).setPhotoUrl(board.getCourses().get(s).getPhotos().get(j).getPhotoUrl());
@@ -80,7 +82,6 @@ public class BoardService {
 
 
                 boardRepository.save(info.getInfo());
-                log.info("---------------------");
                 courseController.shareCourse(info);
 
             }

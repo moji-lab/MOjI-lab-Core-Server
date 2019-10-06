@@ -36,6 +36,7 @@ public class CourseController {
     public ResponseEntity<DefaultRes> shareCourse(@RequestBody final BoardReq board) {
         try {
 
+            log.info("공유 = " + board.getCourses().toString());
             return new ResponseEntity<>(courseService.shareCourse(board), HttpStatus.OK);
 
         } catch (Exception e) {
