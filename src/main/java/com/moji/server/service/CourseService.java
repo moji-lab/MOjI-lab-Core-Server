@@ -59,6 +59,9 @@ public class CourseService {
                     photo.setPhoto(null);
 
                     photos.add(photo);
+
+                    board.getCourses().get(i).getPhotos().get(j).setPhoto(null);
+                    board.getCourses().get(i).getPhotos().get(j).setPhotoUrl(url);
                 }
 
                 course.setPhotos(photos);
@@ -83,6 +86,7 @@ public class CourseService {
 
             for (int i = 0; i < size; i++) {
                 Course course = (Course)board.getCourses().get(i).clone();
+
                 course.setBoardIdx(board.getInfo().get_id());
                 course.setUserIdx(board.getInfo().getUserIdx());
 
