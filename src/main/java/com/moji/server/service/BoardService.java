@@ -57,7 +57,9 @@ public class BoardService {
 
 
             //DB에 저장
+            log.info("저장");
             boardRepository.save(board.getInfo());
+            log.info("완료");
             courseController.saveCourse(board);
 
             //공유
