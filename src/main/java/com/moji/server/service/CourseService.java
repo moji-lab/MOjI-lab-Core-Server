@@ -71,6 +71,41 @@ public class CourseService {
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
         } catch (Exception e) {
             log.info(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
+        }
+    }
+
+    //코스 추가
+    @Transactional
+    public DefaultRes addCourse(final CourseReq courseReq) {
+        try {
+            for (Photo photo : courseReq.getPhotos()) {
+                if(photo.getPhoto() != null) {
+                    photo.setPhotoUrl(s3MultipartService.upload(photo.getPhoto()));
+                    photo.setRepresent(false);
+                }
+            }
+
+            Course course = Course.builder()
+                    .boardIdx(courseReq.getBoardIdx())
+                    .lng(courseReq.getLng())
+                    .lat(courseReq.getLat())
+                    .tagInfo(courseReq.getTagInfo())
+                    .content(courseReq.getContent())
+                    .visitTime(courseReq.getVisitTime())
+                    .subAddress(courseReq.getSubAddress())
+                    .mainAddress(courseReq.getMainAddress())
+                    .order(courseReq.getOrder())
+                    .userIdx(courseReq.getUserIdx())
+                    .photos(courseReq.getPhotos())
+                    .build();
+
+            courseRepository.save(course);
+            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return DefaultRes.res(StatusCode.DB_ERROR, ResponseMessage.DB_ERROR);
         }
     }
@@ -90,8 +125,6 @@ public class CourseService {
                 courseRepository.save(course);
                 data.getCourseIdx().add(course.get_id());
             }
-
-
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD);
         } catch (Exception e) {
             log.info(e.getMessage());

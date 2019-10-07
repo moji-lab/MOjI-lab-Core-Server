@@ -50,14 +50,31 @@ public class CourseController {
     @Auth
     @PutMapping("/courses/{courseIdx}")
     public ResponseEntity isOpenPhoto(@PathVariable(value = "courseIdx") final String courseIdx,
-                                      @RequestBody final CourseReq course,
+                                      @RequestBody final CourseReq courseReq,
                                       final HttpServletRequest httpServletRequest) {
         try {
-            course.setCourseIdx(courseIdx);
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
-            return new ResponseEntity<>(courseService.updateCourse(course, userIdx), HttpStatus.OK);
+            courseReq.setCourseIdx(courseIdx);
+            courseReq.setUserIdx(userIdx);
+            return new ResponseEntity<>(courseService.updateCourse(courseReq, userIdx), HttpStatus.OK);
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Auth
+    @PostMapping("/boards/{boardIdx}/courses")
+    public ResponseEntity saveBoard(@PathVariable(value = "boardIdx") final String boardIdx,
+                                    @RequestBody final CourseReq courseReq,
+                                    final HttpServletRequest httpServletRequest) {
+        try {
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            courseReq.setBoardIdx(boardIdx);
+            courseReq.setUserIdx(userIdx);
+            return new ResponseEntity<>(courseService.addCourse(courseReq), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

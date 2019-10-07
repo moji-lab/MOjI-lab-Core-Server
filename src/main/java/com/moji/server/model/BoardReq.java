@@ -2,6 +2,7 @@ package com.moji.server.model;
 
 import com.moji.server.domain.Board;
 import com.moji.server.domain.Course;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.http.client.utils.CloneUtils;
@@ -9,6 +10,7 @@ import org.apache.http.client.utils.CloneUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Getter
 @Setter
 public class BoardReq implements Cloneable {
@@ -17,7 +19,6 @@ public class BoardReq implements Cloneable {
     private Board info;
     //코스
     private List<Course> courses = new ArrayList<Course>();
-
 
     @Override
     public Object clone() throws CloneNotSupportedException {
