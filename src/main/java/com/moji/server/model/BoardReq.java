@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class BoardReq implements Cloneable{
+public class BoardReq implements Cloneable {
 
     //보드
     private Board info;
@@ -20,19 +20,17 @@ public class BoardReq implements Cloneable{
 
 
     @Override
-    public Object clone() throws CloneNotSupportedException{
-        BoardReq boardReq = (BoardReq)super.clone();
+    public Object clone() throws CloneNotSupportedException {
+        BoardReq boardReq = (BoardReq) super.clone();
         boardReq.info = (Board) CloneUtils.clone(boardReq.info);
 
         List<Course> tmpt = new ArrayList<>();
 
-        for(int i = 0; i < boardReq.courses.size(); i++)
-        {
-            tmpt.add((Course)CloneUtils.clone(boardReq.courses.get(i)));
+        for (int i = 0; i < boardReq.courses.size(); i++) {
+            tmpt.add((Course) CloneUtils.clone(boardReq.courses.get(i)));
         }
 
         boardReq.courses = tmpt;
-//        boardReq.courses = (List<Course>) CloneUtils.clone(boardReq.courses);
         return boardReq;
     }
 }
