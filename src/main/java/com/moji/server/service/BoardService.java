@@ -141,7 +141,7 @@ public class BoardService {
     }
 
     public DefaultRes getRecentFeed(final int userIdx) {
-        return getDefault(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
+        return getDefault2(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
     }
 
     public DefaultRes getBoardList(final int userIdx) {
@@ -150,6 +150,54 @@ public class BoardService {
 
     public DefaultRes getScrapList(final int userIdx, final List<Board> list) {
         return getDefault(userIdx, list);
+    }
+
+    private DefaultRes getDefault2(final int userIdx, final List<Board> boardList) {
+        try {
+            List<FeedRes> feedResList = new ArrayList<>();
+            for (Board board : boardList) {
+                if(board.getUserIdx() == userIdx) continue;
+                Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
+
+                if (!user.isPresent()) {
+                    continue;
+                }
+
+                List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
+                if (courseList.size() == 0) { // 코스 정보가 없을 경우?
+                    continue;
+                }
+                List<Photo> photoList = new ArrayList<>();
+
+                for (int j = 0; j < courseList.size(); j++) {
+                    if (courseList.get(j).getPhotos().get(0) != null) {
+                        photoList.add(courseList.get(j).getPhotos().get(0));
+                    }
+                }
+
+                FeedRes feedRes = new FeedRes();
+                feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
+                feedRes.setProfileUrl(user.get().getPhotoUrl());
+                feedRes.setUserIdx(user.get().getUserIdx());
+                feedRes.setBoardIdx(board.get_id());
+                feedRes.setPlace(board.getSubAddress());
+                feedRes.setComments(board.getComments());
+                feedRes.setPhotoList(photoList);
+                feedRes.setDate(board.getWriteTime());
+                feedRes.setCommentCount(board.getComments().size());
+                feedRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
+                feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+                feedRes.setMainAddress(board.getMainAddress());
+                feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
+                feedRes.setOpen(board.isOpen());
+                feedResList.add(feedRes);
+            }
+            return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private DefaultRes getDefault(final int userIdx, final List<Board> boardList) {
@@ -268,12 +316,9 @@ public class BoardService {
     }
 
     @Transactional
-    public DefaultRes updateBoard(final BoardReq boardReq) {
+    public DefaultRes updateBoard(final Board boardReq) {
         try {
-//            Board board = Board.builder()
-//                    .mainAddress(boardReq)
-//                    .build();
-//            boardRepository.save(boardReq);
+            boardRepository.save(boardReq);
             return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
         } catch (Exception e) {
             log.error(e.getMessage());
