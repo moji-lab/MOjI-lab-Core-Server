@@ -1,6 +1,7 @@
 package com.moji.server.api;
 
 import com.moji.server.model.BoardReq;
+import com.moji.server.model.CourseReq;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.service.CourseService;
 import com.moji.server.util.auth.Auth;
@@ -40,6 +41,21 @@ public class CourseController {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(courseService.isOpenPhoto(courseIdx, photoIdx, userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Auth
+    @PutMapping("/courses/{courseIdx}")
+    public ResponseEntity isOpenPhoto(@PathVariable(value = "courseIdx") final String courseIdx,
+                                      @RequestBody final CourseReq course,
+                                      final HttpServletRequest httpServletRequest) {
+        try {
+            course.setCourseIdx(courseIdx);
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(courseService.updateCourse(course, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);

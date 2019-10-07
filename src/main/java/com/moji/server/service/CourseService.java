@@ -3,10 +3,7 @@ package com.moji.server.service;
 import com.moji.server.domain.Comment;
 import com.moji.server.domain.Course;
 import com.moji.server.domain.Photo;
-import com.moji.server.model.BoardReq;
-import com.moji.server.model.BoardRes2;
-import com.moji.server.model.CourseRes;
-import com.moji.server.model.DefaultRes;
+import com.moji.server.model.*;
 import com.moji.server.repository.CourseRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
@@ -16,9 +13,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -200,6 +195,32 @@ public class CourseService {
             courseRepository.save(course);
 
             return DefaultRes.res(204, "사진 공개 변경 성공", course.getPhotos().get(photoIdx).isRepresent());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DefaultRes.DB_ERROR;
+        }
+    }
+
+    @Transactional
+    public DefaultRes updateCourse(final CourseReq courseReq, final int userIdx) {
+        try {
+            Course course = courseRepository.findBy_id(courseReq.getCourseIdx());
+            if (course == null) return DefaultRes.NOT_FOUND;
+            if (course.getUserIdx() != userIdx) return DefaultRes.UNAUTHORIZED;
+
+            course = Course.builder()
+                    .mainAddress(courseReq.getMainAddress())
+                    .subAddress(courseReq.getSubAddress())
+                    .visitTime(courseReq.getVisitTime())
+                    .content(courseReq.getContent())
+                    .tagInfo(courseReq.getTagInfo())
+                    .lat(courseReq.getLat())
+                    .lng(course.getLng())
+                    .build();
+
+            courseRepository.save(course);
+            return DefaultRes.res(204, "코스 수정 성공", course);
         } catch (Exception e) {
             log.error(e.getMessage());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
