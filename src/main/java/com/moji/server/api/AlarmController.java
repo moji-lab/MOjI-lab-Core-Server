@@ -18,16 +18,14 @@ import javax.servlet.http.HttpServletRequest;
 public class AlarmController {
 
     private final AlarmService alarmService;
-    private final AuthService authService;
 
-    public AlarmController(final AlarmService alarmService,
-                           final AuthService authService) {
+    public AlarmController(final AlarmService alarmService) {
         this.alarmService = alarmService;
-        this.authService = authService;
     }
+
     @Auth
     @GetMapping("/alarms")
-    public ResponseEntity<DefaultRes> getUserAlarms(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<DefaultRes> getUserAlarms(final HttpServletRequest httpServletRequest) {
         try {
             int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(alarmService.getAlarms(userIdx), HttpStatus.OK);
@@ -39,11 +37,12 @@ public class AlarmController {
 
     @Auth
     @PostMapping("/alarms")
-    public ResponseEntity<DefaultRes> saveUserAlarm(HttpServletRequest httpServletRequest,
-                                                    @RequestBody Alarm alarm) {
+    public ResponseEntity<DefaultRes> saveUserAlarm(final HttpServletRequest httpServletRequest,
+                                                    final @RequestBody Alarm alarm) {
         try {
             int userIdx = (int) httpServletRequest.getAttribute("userIdx");
-            return new ResponseEntity<>(alarmService.saveAlarm(userIdx, alarm), HttpStatus.OK);
+            alarm.setSenderIdx(userIdx);
+            return new ResponseEntity<>(alarmService.saveAlarm(alarm), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
