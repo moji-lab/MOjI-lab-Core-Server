@@ -86,6 +86,20 @@ public class BoardController {
     }
 
     @Auth
+    @PutMapping("/boards/{boardIdx}")
+    public ResponseEntity updateBoard(final HttpServletRequest httpServletRequest,
+                                      @PathVariable(value = "boardIdx") final String boardIdx,
+                                      @RequestBody final BoardReq boardReq) {
+        try {
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(boardService.updateBoard(boardReq), HttpStatus.OK);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Auth
     @DeleteMapping("/boards/{boardIdx}")
     public ResponseEntity deleteBoard(final HttpServletRequest httpServletRequest,
                                       @PathVariable final String boardIdx) {

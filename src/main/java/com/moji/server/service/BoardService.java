@@ -156,8 +156,6 @@ public class BoardService {
         try {
             List<FeedRes> feedResList = new ArrayList<>();
             for (Board board : boardList) {
-                if (board.getUserIdx() == userIdx) continue;
-
                 Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
 
                 if (!user.isPresent()) {
@@ -261,6 +259,21 @@ public class BoardService {
             scrapService.deleteAllScrap(boardIdx);
             courseService.deleteAllCourse(boardIdx);
             likeService.deleteBoardLike(boardIdx);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
+        }
+    }
+
+    @Transactional
+    public DefaultRes updateBoard(final BoardReq boardReq) {
+        try {
+//            Board board = Board.builder()
+//                    .mainAddress(boardReq)
+//                    .build();
+//            boardRepository.save(boardReq);
             return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
         } catch (Exception e) {
             log.error(e.getMessage());
