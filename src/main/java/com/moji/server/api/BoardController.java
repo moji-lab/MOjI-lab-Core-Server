@@ -28,8 +28,6 @@ public class BoardController {
                                     final HttpServletRequest httpServletRequest) {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
-            log.info("보드 컨트롤");
-            log.info("시작");
             return new ResponseEntity<>(boardService.saveBoard(board, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
