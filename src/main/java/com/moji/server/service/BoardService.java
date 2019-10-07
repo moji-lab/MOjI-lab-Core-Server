@@ -49,15 +49,11 @@ public class BoardService {
     @Transactional
     public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException {
         try {
-
-            log.info("보드 서비스로 들어옴" +
-                    "");
             BoardRes2 data = BoardRes2.getBoardRes2();
             data.getCourseIdx().clear();
 
             board.getInfo().setWriteTime(LocalDate.now());
             board.getInfo().setUserIdx(userIdx);
-
 
             //DB에 저장
             boardRepository.save(board.getInfo());
@@ -226,6 +222,7 @@ public class BoardService {
 
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
