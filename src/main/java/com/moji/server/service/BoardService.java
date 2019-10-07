@@ -160,6 +160,8 @@ public class BoardService {
         try {
             List<FeedRes> feedResList = new ArrayList<>();
             for (Board board : boardList) {
+                if (board.getUserIdx() == userIdx) continue;
+
                 Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
 
                 if (!user.isPresent()) {
