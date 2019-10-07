@@ -1,5 +1,6 @@
 package com.moji.server.api;
 
+import com.moji.server.domain.Board;
 import com.moji.server.model.BoardReq;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.service.BoardService;
@@ -89,7 +90,7 @@ public class BoardController {
     @PutMapping("/boards/{boardIdx}")
     public ResponseEntity updateBoard(final HttpServletRequest httpServletRequest,
                                       @PathVariable(value = "boardIdx") final String boardIdx,
-                                      @RequestBody final BoardReq boardReq) {
+                                      @RequestBody final Board boardReq) {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.updateBoard(boardReq), HttpStatus.OK);
