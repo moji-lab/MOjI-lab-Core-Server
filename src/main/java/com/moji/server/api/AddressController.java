@@ -25,8 +25,6 @@ public class AddressController {
         this.tourApiService = tourApiServices;
     }
 
-    // 기록하기 핵심 주소 저장
-
     @PostMapping("/addresses")
     public ResponseEntity<DefaultRes> saveBoardAddress(@RequestBody Address address) {
         try {
@@ -42,7 +40,7 @@ public class AddressController {
     @GetMapping("/addresses")
     public ResponseEntity<DefaultRes> getTourApiAddresses(@RequestParam("keyword") final String keyword) {
         try {
-            return new ResponseEntity<>(tourApiService.getTourApiDataByKeyword(keyword), HttpStatus.OK);
+            return new ResponseEntity<>(tourApiService.getAddressByKeyword(keyword), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);

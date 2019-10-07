@@ -24,10 +24,15 @@ public class BoardController {
     //게시물 등록
     @Auth
     @PostMapping("boards")
-    public ResponseEntity<DefaultRes> saveBoard(final BoardReq board,
-                                                final HttpServletRequest httpServletRequest) {
+    public ResponseEntity saveBoard(final BoardReq board,
+                                    final HttpServletRequest httpServletRequest) {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+
+            log.info("보드 컨트롤");
+//            log.info(board.getInfo().toString());
+            log.info("시작");
+//            log.info(board.getCourses().toString());
             return new ResponseEntity<>(boardService.saveBoard(board, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
@@ -37,7 +42,7 @@ public class BoardController {
 
     @Auth
     @GetMapping("/boards")
-    public ResponseEntity<DefaultRes> getRandomBoards(final HttpServletRequest httpServletRequest) {
+    public ResponseEntity getRandomBoards(final HttpServletRequest httpServletRequest) {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.getRecentFeed(userIdx), HttpStatus.OK);
@@ -49,11 +54,11 @@ public class BoardController {
 
     @Auth
     @GetMapping("/boards/{boardIdx}")
-    public ResponseEntity<DefaultRes> getBoardsInfo(
+    public ResponseEntity getBoardsInfo(
             @PathVariable(value = "boardIdx") final String boardIdx,
             final HttpServletRequest httpServletRequest) {
         try {
-            int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.getBoardInfo(boardIdx, userIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
@@ -63,7 +68,7 @@ public class BoardController {
 
     //게시물 공유 사람 조회
     @GetMapping("shares")
-    public ResponseEntity<DefaultRes> getSharePerson(@RequestParam(value = "person", required = false) final String person) {
+    public ResponseEntity getSharePerson(@RequestParam(value = "person", required = false) final String person) {
         try {
             return new ResponseEntity<>(boardService.getSharePerson(person), HttpStatus.OK);
         } catch (Exception e) {
@@ -72,4 +77,29 @@ public class BoardController {
         }
     }
 
+    @Auth
+    @PutMapping("/boards/{boardIdx}/public")
+    public ResponseEntity boardPublic(final HttpServletRequest httpServletRequest,
+                                      @PathVariable final String boardIdx) {
+        try {
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(boardService.boardPublic(boardIdx, userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Auth
+    @DeleteMapping("/boards/{boardIdx}")
+    public ResponseEntity deleteBoard(final HttpServletRequest httpServletRequest,
+                                      @PathVariable final String boardIdx) {
+        try {
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(boardService.deleteBoard(boardIdx, userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

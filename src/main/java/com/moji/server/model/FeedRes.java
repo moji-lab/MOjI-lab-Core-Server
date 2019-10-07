@@ -12,6 +12,7 @@ import java.util.List;
 
 @Data
 public class FeedRes {
+    private int userIdx;
     private String nickName;
     private String profileUrl;
     private LocalDate date;
@@ -23,5 +24,6 @@ public class FeedRes {
     private int commentCount;
     private String mainAddress;
     private boolean isScraped;
+    private boolean isOpen;
     private List<Comment> comments = new ArrayList<Comment>();
 }

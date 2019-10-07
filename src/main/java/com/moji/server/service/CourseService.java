@@ -12,9 +12,11 @@ import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
@@ -59,6 +61,9 @@ public class CourseService {
                     photo.setPhoto(null);
 
                     photos.add(photo);
+
+                    board.getCourses().get(i).getPhotos().get(j).setPhoto(null);
+                    board.getCourses().get(i).getPhotos().get(j).setPhotoUrl(url);
                 }
 
                 course.setPhotos(photos);
@@ -83,6 +88,7 @@ public class CourseService {
 
             for (int i = 0; i < size; i++) {
                 Course course = (Course)board.getCourses().get(i).clone();
+
                 course.setBoardIdx(board.getInfo().get_id());
                 course.setUserIdx(board.getInfo().getUserIdx());
 
@@ -160,5 +166,19 @@ public class CourseService {
         }
 
         return courseResList;
+    }
+
+    @Transactional
+    public void deleteAllCourse(final String boardIdx) {
+        try {
+            List<Course> courseList = courseRepository.findByBoardIdx(boardIdx);
+            for (Course c : courseList) {
+                likeService.deleteCourseLike(c.get_id());
+            }
+            courseRepository.deleteByBoardIdx(boardIdx);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
     }
 }

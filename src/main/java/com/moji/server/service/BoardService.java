@@ -9,12 +9,15 @@ import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.moji.server.model.DefaultRes.DB_ERROR;
 
 @Slf4j
 @Service
@@ -44,8 +47,11 @@ public class BoardService {
 
     //게시물 작성
     @Transactional
-    public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException{
+    public DefaultRes saveBoard(final BoardReq board, int userIdx) throws CloneNotSupportedException {
         try {
+
+            log.info("보드 서비스로 들어옴" +
+                    "");
             BoardRes2 data = BoardRes2.getBoardRes2();
             data.getCourseIdx().clear();
 
@@ -63,7 +69,8 @@ public class BoardService {
                 BoardReq info = (BoardReq) board.clone();
                 info.getInfo().set_id(null);
 
-                for(int s = 0; s < board.getCourses().size(); s++) {
+                for (int s = 0; s < board.getCourses().size(); s++) {
+
                     for (int j = 0; j < board.getCourses().get(s).getPhotos().size(); j++) {
                         info.getCourses().get(s).getPhotos().get(j).setPhoto(null);
                         info.getCourses().get(s).getPhotos().get(j).setPhotoUrl(board.getCourses().get(s).getPhotos().get(j).getPhotoUrl());
@@ -75,20 +82,20 @@ public class BoardService {
 
 
                 boardRepository.save(info.getInfo());
-                log.info("---------------------");
                 courseController.shareCourse(info);
 
             }
 
-            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD,data);
+            return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATE_BOARD, data);
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.FAIL_CREATE_BOARD);
         }
     }
 
     public Board getBoard(String boardIdx) {
-        return boardRepository.findBy_id(boardIdx);
+        return boardRepository.findBy_id(boardIdx).get();
     }
 
     public void saveComment(String boardIdx, Comment comment) {
@@ -166,7 +173,7 @@ public class BoardService {
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
-                    if(courseList.get(j).getPhotos().get(0) != null) {
+                    if (courseList.get(j).getPhotos().get(0) != null) {
                         photoList.add(courseList.get(j).getPhotos().get(0));
                     }
                 }
@@ -174,6 +181,7 @@ public class BoardService {
                 FeedRes feedRes = new FeedRes();
                 feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
                 feedRes.setProfileUrl(user.get().getPhotoUrl());
+                feedRes.setUserIdx(user.get().getUserIdx());
                 feedRes.setBoardIdx(board.get_id());
                 feedRes.setPlace(board.getSubAddress());
                 feedRes.setComments(board.getComments());
@@ -184,6 +192,7 @@ public class BoardService {
                 feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
                 feedRes.setMainAddress(board.getMainAddress());
                 feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
+                feedRes.setOpen(board.isOpen());
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
@@ -197,8 +206,8 @@ public class BoardService {
     public DefaultRes<BoardRes> getBoardInfo(final String boardIdx, final int userIdx) {
         try {
             final BoardRes boardRes = new BoardRes();
-            final Optional<User> user = userRepository.findByUserIdx(userIdx);
-            final Board board = boardRepository.findBy_id(boardIdx);
+            final Board board = boardRepository.findBy_id(boardIdx).get();
+            final Optional<User> user = userRepository.findById(board.getUserIdx());
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
@@ -215,6 +224,47 @@ public class BoardService {
         } catch (Exception e) {
             log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public DefaultRes boardPublic(final String boardIdx, final int userIdx) {
+        Optional<Board> boardOptional = boardRepository.findBy_id(boardIdx);
+        if (!boardOptional.isPresent()) return DefaultRes.NOT_FOUND;
+        Board board = boardOptional.get();
+        if (board.getUserIdx() != userIdx) return DefaultRes.UNAUTHORIZED;
+        if (board.isOpen()) {
+            board.setOpen(false);
+        } else {
+            board.setOpen(true);
+        }
+
+        try {
+            boardRepository.save(board);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "공개 범위 변경 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
+        }
+    }
+
+    @Transactional
+    public DefaultRes deleteBoard(final String boardIdx, final int userIdx) {
+        Optional<Board> boardOptional = boardRepository.findBy_id(boardIdx);
+        if (!boardOptional.isPresent()) return DefaultRes.NOT_FOUND;
+        Board board = boardOptional.get();
+        if (board.getUserIdx() != userIdx) return DefaultRes.UNAUTHORIZED;
+        try {
+            boardRepository.delete(board);
+            scrapService.deleteAllScrap(boardIdx);
+            courseService.deleteAllCourse(boardIdx);
+            likeService.deleteBoardLike(boardIdx);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
         }
     }
 }

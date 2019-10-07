@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AlarmRepository extends MongoRepository<Alarm, String> {
-    Optional<List<Alarm>> findByUserIdx(int userIdx);
+    Optional<List<Alarm>> findByReceiverIdx(int userIdx);
 }
