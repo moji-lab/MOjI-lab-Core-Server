@@ -21,11 +21,11 @@ public class CourseController {
         this.courseService = courseService;
     }
 
+    @Auth
     @GetMapping("/course/{courseIdx}")
-    public ResponseEntity getCourse(@PathVariable(value = "courseIdx") final String courseIdx,
-                                    final HttpServletRequest httpServletRequest) {
+    public ResponseEntity getCourse(@PathVariable(value = "courseIdx") final String courseIdx) {
         try {
-            return new ResponseEntity<>(courseService.getCourse(courseIdx), HttpStatus.OK);
+            return new ResponseEntity<>(courseService.getCourse2(courseIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);

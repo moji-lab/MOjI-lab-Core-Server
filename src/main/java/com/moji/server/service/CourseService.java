@@ -114,6 +114,12 @@ public class CourseService {
         return courseRepository.findBy_id(courseIdx);
     }
 
+    public DefaultRes getCourse2(final String courseIdx) {
+        Course course = courseRepository.findBy_id(courseIdx);
+        if (course == null) return DefaultRes.NOT_FOUND;
+        return DefaultRes.res(200, "코스 조회 성공", course);
+    }
+
     /**
      * CommentService에서 받아온 comment 추가
      *
