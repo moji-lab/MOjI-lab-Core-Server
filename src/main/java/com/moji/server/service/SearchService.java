@@ -191,4 +191,22 @@ public class SearchService {
         }
         return Optional.ofNullable(searchCourseRes);
     }
+
+    public DefaultRes <SearchCourseRes> getAllSearchResult() {
+        SearchCourseRes searchCourseRes = new SearchCourseRes();
+
+        List<Course> courses = courseRepository.findAll();
+        List<CourseSearchResult> courseSearchResultList = new ArrayList<>();
+        Optional<List<Course>> temp;
+
+        for(int i = 0; i<courses.size(); i++) {
+            CourseSearchResult courseSearchResult = new CourseSearchResult();
+            courseSearchResult.setCourse(courses.get(i));
+            courseSearchResult.setLikeCount(likeCourseRepository.countByCourseIdx(courses.get(i).get_id()));
+            courseSearchResultList.add(courseSearchResult);
+        }
+        Collections.sort(courseSearchResultList);
+        searchCourseRes.setCourses(courseSearchResultList);
+        return DefaultRes.res(StatusCode.OK, "검색 성공", searchCourseRes);
+    }
 }

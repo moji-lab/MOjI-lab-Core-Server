@@ -32,7 +32,10 @@ public class SearchController {
                                              HttpServletRequest httpServletRequest) {
         try{
             int userIdx = (int) httpServletRequest.getAttribute("userIdx");
-            if(searchReq.getKeyword().charAt(0) == '#') {
+            if(searchReq.getKeyword() == null){
+                return new ResponseEntity<>(searchService.getAllSearchResult(), HttpStatus.OK);
+            }
+            else if(searchReq.getKeyword().charAt(0) == '#') {
                 String keywordExceptHash = searchReq.getKeyword().substring(1);
                 searchReq.setKeyword(keywordExceptHash);
                 return new ResponseEntity<>(searchService.getSearchResultByHashtag(searchReq), HttpStatus.OK);
