@@ -30,17 +30,19 @@ public class CommentController {
 
     /**
      * board 댓글 작성
+     *
      * @param commentReq
      * @return
      */
     @Auth
     @PostMapping("/boards")
     public ResponseEntity saveBoardComment(
-            @RequestBody CommentReq commentReq,
-            HttpServletRequest httpServletRequest) {
+            final @RequestBody CommentReq commentReq,
+            final HttpServletRequest httpServletRequest) {
         try {
+            log.info("기록하기 댓글 작성 " + commentReq.toString());
             commentReq.setUserIdx((int) httpServletRequest.getAttribute("userIdx"));
-            return new ResponseEntity<>(commentService.saveBoardComment(commentReq),HttpStatus.OK);
+            return new ResponseEntity<>(commentService.saveBoardComment(commentReq), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());
@@ -50,17 +52,19 @@ public class CommentController {
 
     /**
      * course 댓글 작성
+     *
      * @param commentReq
      * @return
      */
     @Auth
     @PostMapping("/courses")
     public ResponseEntity saveCourseComment(
-            @RequestBody CommentReq commentReq,
-            HttpServletRequest httpServletRequest) {
+            final @RequestBody CommentReq commentReq,
+            final HttpServletRequest httpServletRequest) {
         try {
+            log.info("코스 댓글 작성 : " + commentReq.toString());
             commentReq.setUserIdx((int) httpServletRequest.getAttribute("userIdx"));
-            return new ResponseEntity<>(commentService.saveCourseComment(commentReq),HttpStatus.OK);
+            return new ResponseEntity<>(commentService.saveCourseComment(commentReq), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());
@@ -74,7 +78,7 @@ public class CommentController {
                                            @PathVariable final String boardIdx) {
         try {
             final int userIdx = ((int) httpServletRequest.getAttribute("userIdx"));
-            return new ResponseEntity<>(commentService.getBoardComments(userIdx, boardIdx),HttpStatus.OK);
+            return new ResponseEntity<>(commentService.getBoardComments(userIdx, boardIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -84,10 +88,10 @@ public class CommentController {
     @Auth
     @GetMapping("/courses/{courseIdx}")
     public ResponseEntity getCourseComments(final HttpServletRequest httpServletRequest,
-                                           @PathVariable final String courseIdx) {
+                                            @PathVariable final String courseIdx) {
         try {
             final int userIdx = ((int) httpServletRequest.getAttribute("userIdx"));
-            return new ResponseEntity<>(commentService.getCourseComments(courseIdx),HttpStatus.OK);
+            return new ResponseEntity<>(commentService.getCourseComments(courseIdx), HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);

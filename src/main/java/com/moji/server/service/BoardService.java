@@ -145,7 +145,10 @@ public class BoardService {
     }
 
     public DefaultRes getBoardList(final int userIdx) {
-        return getDefault(userIdx, boardRepository.findByUserIdx(userIdx));
+        List<Board> list = boardRepository.findByUserIdx(userIdx);
+        log.info("userIdx : " + userIdx);
+        log.info("mypage : " + list.size());
+        return getDefault(userIdx, list);
     }
 
     public DefaultRes getScrapList(final int userIdx, final List<Board> list) {
@@ -164,9 +167,9 @@ public class BoardService {
                 }
 
                 List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
-                if (courseList.size() == 0) { // 코스 정보가 없을 경우?
-                    continue;
-                }
+
+                if (courseList.size() == 0) continue;
+
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
@@ -211,9 +214,9 @@ public class BoardService {
                 }
 
                 List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
-                if (courseList.size() == 0) { // 코스 정보가 없을 경우?
-                    continue;
-                }
+
+                if (courseList.size() == 0) continue;
+
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
@@ -260,7 +263,9 @@ public class BoardService {
             boardRes.setUser(user.get());
             boardRes.set_id(boardIdx);
             boardRes.setWriteTime(board.getWriteTime());
-            boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
+            List<CourseRes> list = courseService.getCourseListByBoardIdx(boardIdx, userIdx);
+            log.info("courseRes : " + list.size());
+            boardRes.setCourseList(list);
             boardRes.setScraped(scrapService.isScraped(userIdx, boardIdx));
             boardRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
             boardRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
