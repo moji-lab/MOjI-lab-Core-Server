@@ -25,6 +25,8 @@ public class AlarmService {
         this.userService = userService;
     }
 
+    // 알람 조회
+
     public DefaultRes getAlarms(final int userIdx){
         Optional<List<Alarm>> alarms = alarmRepository.findByReceiverIdx(userIdx);
         if(alarms.isPresent()){
@@ -33,6 +35,8 @@ public class AlarmService {
         return alarms.map(value -> DefaultRes.res(StatusCode.OK, "알람 조회 성공", value)).orElseGet(() -> DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러"));
     }
 
+    // 알람 저장
+    
     public DefaultRes saveAlarm(final int userIdx, final Alarm alarm){
         try{
             alarm.setSenderIdx(userIdx);
