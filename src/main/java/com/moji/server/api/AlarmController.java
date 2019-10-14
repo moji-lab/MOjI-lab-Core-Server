@@ -42,7 +42,7 @@ public class AlarmController {
         try {
             int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             alarm.setSenderIdx(userIdx);
-            return new ResponseEntity<>(alarmService.saveAlarm(alarm), HttpStatus.OK);
+            return new ResponseEntity<>(alarmService.saveAlarm(userIdx, alarm), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
