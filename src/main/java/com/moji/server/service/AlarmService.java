@@ -31,6 +31,13 @@ public class AlarmService {
         Optional<List<Alarm>> alarms = alarmRepository.findByReceiverIdx(userIdx);
         if(alarms.isPresent()){
             if(alarms.get().size() == 0){ return DefaultRes.res(StatusCode.NOT_FOUND, "알람이 없습니다."); }
+            else{
+                for(Alarm alarm : alarms.get()){
+                    if(userService.findPhotoUrlByUserIdx(alarm.getSenderIdx()).isPresent()){
+                        alarm.setSenderPhotoUrl(userService.findPhotoUrlByUserIdx(alarm.getSenderIdx()).get());
+                    }
+                }
+            }
         }
         return alarms.map(value -> DefaultRes.res(StatusCode.OK, "알람 조회 성공", value)).orElseGet(() -> DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러"));
     }
