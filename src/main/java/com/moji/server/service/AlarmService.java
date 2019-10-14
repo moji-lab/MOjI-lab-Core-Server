@@ -36,7 +36,7 @@ public class AlarmService {
     }
 
     // 알람 저장
-    
+
     public DefaultRes saveAlarm(final int userIdx, final Alarm alarm){
         try{
             alarm.setSenderIdx(userIdx);
