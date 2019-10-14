@@ -1,12 +1,8 @@
 package com.moji.server.service;
 
-import com.moji.server.domain.*;
-import com.moji.server.domain.SearchResult.CourseSearchResult;
-import com.moji.server.model.CourseRes;
+import com.moji.server.domain.HashtagCourse;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.HomeRes;
-import com.moji.server.model.SearchRes;
-import com.moji.server.model.SearchRes.SearchCourseRes;
 import com.moji.server.repository.*;
 import com.moji.server.util.StatusCode;
 import org.springframework.stereotype.Service;
@@ -53,6 +49,7 @@ public class HomeService {
             return DefaultRes.res(StatusCode.OK, "홈 조회 성공", homeRes);
         }
         catch(Exception e){
+            e.printStackTrace();
             return DefaultRes.res(StatusCode.DB_ERROR, "데이터베이스 에러");
         }
     }
@@ -70,7 +67,7 @@ public class HomeService {
                 return counter.get(y) - counter.get(x);
             }
         });
-        list = list.subList(0,5);
+        list = list.subList(0, list.size() >= 5 ? 5 : list.size());
         List<String> tagInfoList = new ArrayList<>();
         for (String tagIdx : list) {
             tagInfoList.add(hashtagRepository.findById(tagIdx).get().getTagInfo());

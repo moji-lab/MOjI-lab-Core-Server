@@ -7,7 +7,6 @@ import com.moji.server.repository.BoardRepository;
 import com.moji.server.repository.UserRepository;
 import com.moji.server.util.ResponseMessage;
 import com.moji.server.util.StatusCode;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -56,7 +55,6 @@ public class BoardService {
             board.getInfo().setWriteTime(LocalDate.now());
             board.getInfo().setUserIdx(userIdx);
 
-
             //DB에 저장
             boardRepository.save(board.getInfo());
             courseController.saveCourse(board);
@@ -68,6 +66,7 @@ public class BoardService {
                 info.getInfo().set_id(null);
 
                 for (int s = 0; s < board.getCourses().size(); s++) {
+
                     for (int j = 0; j < board.getCourses().get(s).getPhotos().size(); j++) {
                         info.getCourses().get(s).getPhotos().get(j).setPhoto(null);
                         info.getCourses().get(s).getPhotos().get(j).setPhotoUrl(board.getCourses().get(s).getPhotos().get(j).getPhotoUrl());
@@ -79,7 +78,6 @@ public class BoardService {
 
 
                 boardRepository.save(info.getInfo());
-                log.info("---------------------");
                 courseController.shareCourse(info);
 
             }
@@ -143,21 +141,25 @@ public class BoardService {
     }
 
     public DefaultRes getRecentFeed(final int userIdx) {
-        return getDefault(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
+        return getDefault2(userIdx, boardRepository.findByOpenOrderByWriteTimeDesc(true));
     }
 
     public DefaultRes getBoardList(final int userIdx) {
-        return getDefault(userIdx, boardRepository.findByUserIdx(userIdx));
+        List<Board> list = boardRepository.findByUserIdx(userIdx);
+        log.info("userIdx : " + userIdx);
+        log.info("mypage : " + list.size());
+        return getDefault(userIdx, list);
     }
 
     public DefaultRes getScrapList(final int userIdx, final List<Board> list) {
         return getDefault(userIdx, list);
     }
 
-    private DefaultRes getDefault(final int userIdx, final List<Board> boardList) {
+    private DefaultRes getDefault2(final int userIdx, final List<Board> boardList) {
         try {
             List<FeedRes> feedResList = new ArrayList<>();
             for (Board board : boardList) {
+                if(board.getUserIdx() == userIdx) continue;
                 Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
 
                 if (!user.isPresent()) {
@@ -165,9 +167,9 @@ public class BoardService {
                 }
 
                 List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
-                if (courseList.size() == 0) { // 코스 정보가 없을 경우?
-                    continue;
-                }
+
+                if (courseList.size() == 0) continue;
+
                 List<Photo> photoList = new ArrayList<>();
 
                 for (int j = 0; j < courseList.size(); j++) {
@@ -190,6 +192,54 @@ public class BoardService {
                 feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
                 feedRes.setMainAddress(board.getMainAddress());
                 feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
+                feedRes.setOpen(board.isOpen());
+                feedResList.add(feedRes);
+            }
+            return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private DefaultRes getDefault(final int userIdx, final List<Board> boardList) {
+        try {
+            List<FeedRes> feedResList = new ArrayList<>();
+            for (Board board : boardList) {
+                Optional<User> user = userRepository.findByUserIdx(board.getUserIdx());
+
+                if (!user.isPresent()) {
+                    continue;
+                }
+
+                List<Course> courseList = courseService.getFirstRepresentPhotoByBoardIdx(board.get_id());
+
+                if (courseList.size() == 0) continue;
+
+                List<Photo> photoList = new ArrayList<>();
+
+                for (int j = 0; j < courseList.size(); j++) {
+                    if (courseList.get(j).getPhotos().get(0) != null) {
+                        photoList.add(courseList.get(j).getPhotos().get(0));
+                    }
+                }
+
+                FeedRes feedRes = new FeedRes();
+                feedRes.setNickName(user.get().getNickname()); // TODO: 탈퇴한 회원일 경우? 일단 그거빼고 게시물 보여줘...?
+                feedRes.setProfileUrl(user.get().getPhotoUrl());
+                feedRes.setUserIdx(user.get().getUserIdx());
+                feedRes.setBoardIdx(board.get_id());
+                feedRes.setPlace(board.getSubAddress());
+                feedRes.setComments(board.getComments());
+                feedRes.setPhotoList(photoList);
+                feedRes.setDate(board.getWriteTime());
+                feedRes.setCommentCount(board.getComments().size());
+                feedRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
+                feedRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
+                feedRes.setMainAddress(board.getMainAddress());
+                feedRes.setScraped(scrapService.isScraped(userIdx, board.get_id()));
+                feedRes.setOpen(board.isOpen());
                 feedResList.add(feedRes);
             }
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_FEED, feedResList);
@@ -203,8 +253,8 @@ public class BoardService {
     public DefaultRes<BoardRes> getBoardInfo(final String boardIdx, final int userIdx) {
         try {
             final BoardRes boardRes = new BoardRes();
-            final Optional<User> user = userRepository.findByUserIdx(userIdx);
             final Board board = boardRepository.findBy_id(boardIdx).get();
+            final Optional<User> user = userRepository.findById(board.getUserIdx());
 
             if (board == null) {
                 return DefaultRes.res(StatusCode.BAD_REQUEST, ResponseMessage.NOT_FOUND_BOARD);
@@ -213,7 +263,9 @@ public class BoardService {
             boardRes.setUser(user.get());
             boardRes.set_id(boardIdx);
             boardRes.setWriteTime(board.getWriteTime());
-            boardRes.setCourseList(courseService.getCourseListByBoardIdx(boardIdx, userIdx));
+            List<CourseRes> list = courseService.getCourseListByBoardIdx(boardIdx, userIdx);
+            log.info("courseRes : " + list.size());
+            boardRes.setCourseList(list);
             boardRes.setScraped(scrapService.isScraped(userIdx, boardIdx));
             boardRes.setLiked(likeService.isLikedBoard(board.get_id(), userIdx));
             boardRes.setLikeCount(likeService.getBoardLikeCount(board.get_id()));
@@ -221,6 +273,7 @@ public class BoardService {
 
             return DefaultRes.res(StatusCode.OK, ResponseMessage.READ_BOARD, boardRes);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error(e.getMessage());
             return DefaultRes.res(StatusCode.INTERNAL_SERVER_ERROR, ResponseMessage.INTERNAL_SERVER_ERROR);
         }
@@ -259,6 +312,18 @@ public class BoardService {
             scrapService.deleteAllScrap(boardIdx);
             courseService.deleteAllCourse(boardIdx);
             likeService.deleteBoardLike(boardIdx);
+            return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return DB_ERROR;
+        }
+    }
+
+    @Transactional
+    public DefaultRes updateBoard(final Board boardReq) {
+        try {
+            boardRepository.save(boardReq);
             return DefaultRes.res(StatusCode.NO_CONTENT, "게시글 삭제 완료");
         } catch (Exception e) {
             log.error(e.getMessage());

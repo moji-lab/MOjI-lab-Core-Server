@@ -1,5 +1,6 @@
 package com.moji.server.api;
 
+import com.moji.server.domain.Board;
 import com.moji.server.model.BoardReq;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.service.BoardService;
@@ -27,6 +28,7 @@ public class BoardController {
     public ResponseEntity saveBoard(final BoardReq board,
                                     final HttpServletRequest httpServletRequest) {
         try {
+            log.info("게시물 등록 : " + board.toString());
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.saveBoard(board, userIdx), HttpStatus.OK);
         } catch (Exception e) {
@@ -79,6 +81,21 @@ public class BoardController {
         try {
             final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
             return new ResponseEntity<>(boardService.boardPublic(boardIdx, userIdx), HttpStatus.OK);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Auth
+    @PutMapping("/boards/{boardIdx}")
+    public ResponseEntity updateBoard(final HttpServletRequest httpServletRequest,
+                                      @PathVariable(value = "boardIdx") final String boardIdx,
+                                      @RequestBody final Board boardReq) {
+        try {
+            log.info("게시물 수정 : " + boardReq.toString());
+            final int userIdx = (int) httpServletRequest.getAttribute("userIdx");
+            return new ResponseEntity<>(boardService.updateBoard(boardReq), HttpStatus.OK);
         } catch (Exception e) {
             log.info(e.getMessage());
             return new ResponseEntity<>(DefaultRes.FAIL_DEFAULT_RES, HttpStatus.INTERNAL_SERVER_ERROR);
