@@ -35,6 +35,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<DefaultRes> login(@RequestBody final LoginReq loginReq) {
         try {
+            log.info("로그인 : " + loginReq.toString());
             return new ResponseEntity<>(authService.login(loginReq), HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());

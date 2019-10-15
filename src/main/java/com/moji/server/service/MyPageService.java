@@ -3,6 +3,7 @@ package com.moji.server.service;
 import com.moji.server.domain.Board;
 import com.moji.server.domain.Scrap;
 import com.moji.server.domain.User;
+import com.moji.server.model.BoardReq;
 import com.moji.server.model.BoardRes;
 import com.moji.server.model.DefaultRes;
 import com.moji.server.model.MyPageRes;

@@ -1,6 +1,9 @@
 package com.moji.server.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.http.client.utils.CloneUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,9 +16,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Document(collection = "course")
-public class Course implements Cloneable{
+public class Course implements Cloneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +32,7 @@ public class Course implements Cloneable{
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate visitTime;
-  
+
     private String content;
     private int order;
     private List<String> tagInfo = new ArrayList<String>();
@@ -49,19 +55,17 @@ public class Course implements Cloneable{
 
 
     @Override
-    public Object clone() throws CloneNotSupportedException{
-        Course course = (Course)super.clone();
+    public Object clone() throws CloneNotSupportedException {
+        Course course = (Course) super.clone();
         course.tagInfo = (List<String>) CloneUtils.clone(course.tagInfo);
 
         List<Photo> tmpt = new ArrayList<>();
 
-        for(int i = 0; i < course.photos.size(); i++)
-        {
-            tmpt.add((Photo)CloneUtils.clone(course.photos.get(i)));
+        for (int i = 0; i < course.photos.size(); i++) {
+            tmpt.add((Photo) CloneUtils.clone(course.photos.get(i)));
         }
 
         course.photos = tmpt;
-//        course.photos = (List<Photo>) CloneUtils.clone(course.photos);
         return course;
     }
 }
